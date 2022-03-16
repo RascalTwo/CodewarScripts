@@ -6,7 +6,7 @@ require('dotenv').config();
 
 const USER_AGENT = process.env.USER_AGENT;
 const REMEMBER_USER_TOKEN = process.env.REMEMBER_USER_TOKEN;
-const USERNAME = process.env.USERNAME!;
+const USER_NAME = process.env.USER_NAME!;
 
 function parseHTMLUsernames(html: string): Record<string, Entry> {
   return Array.from(new JSDOM(html).window.document.querySelectorAll('tr')).reduce((usernames, row) => {
@@ -29,17 +29,17 @@ interface Entry {
 }
 
 async function getOwnInfo(): Promise<Entry> {
-  const response = await fetch(`https://www.codewars.com/users/${USERNAME}/stats`);
+  const response = await fetch(`https://www.codewars.com/users/${USER_NAME}/stats`);
   const document = new JSDOM(await response.text()).window.document;
   return {
     rank: document.querySelector('.stat-container .stat')!.childNodes[1].textContent!,
     honor: +document.querySelector('.stat-container .stat:nth-of-type(2)')!.childNodes[1].textContent!,
-    username: USERNAME,
+    username: USER_NAME,
   };
 }
 
 (async () => {
-  const response = await fetch(`https://www.codewars.com/users/${USERNAME}/allies`, {
+  const response = await fetch(`https://www.codewars.com/users/${USER_NAME}/allies`, {
     headers: {
       'User-Agent': USER_AGENT,
       Cookie: 'remember_user_token=' + REMEMBER_USER_TOKEN,
@@ -50,7 +50,7 @@ async function getOwnInfo(): Promise<Entry> {
   let page = 1;
   while (true) {
     process.stdout.write(`${page.toString().padStart(2, '0')} \r`);
-    const response = await fetch(`https://www.codewars.com/users/${USERNAME}/allies?page=${page++}`, {
+    const response = await fetch(`https://www.codewars.com/users/${USER_NAME}/allies?page=${page++}`, {
       headers: {
         'x-requested-with': 'XMLHttpRequest',
       },
@@ -61,7 +61,7 @@ async function getOwnInfo(): Promise<Entry> {
     if (!length || length !== 15) break;
   }
 
-  rows[USERNAME] = await getOwnInfo();
+  rows[USER_NAME] = await getOwnInfo();
 
   console.log();
   return fs.promises.writeFile(

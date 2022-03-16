@@ -2,11 +2,8 @@ import fs from 'fs';
 // @ts-ignore
 import fetch from 'node-fetch';
 import { JSDOM } from 'jsdom';
-require('dotenv').config();
+import { USER_NAME, USER_AGENT, REMEMBER_USER_TOKEN } from './constants';
 
-const USER_AGENT = process.env.USER_AGENT;
-const REMEMBER_USER_TOKEN = process.env.REMEMBER_USER_TOKEN;
-const USER_NAME = process.env.USER_NAME!;
 
 function parseHTMLUsernames(html: string): Record<string, Entry> {
   return Array.from(new JSDOM(html).window.document.querySelectorAll('tr')).reduce((usernames, row) => {

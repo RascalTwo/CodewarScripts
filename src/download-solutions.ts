@@ -34,6 +34,8 @@ function parseHTMLSolutions(html: string): Record<string, CompletedKata> {
       {},
     );
 }
+
+
 (async () => {
   const response = await fetch(`https://www.codewars.com/users/${USER_NAME}/completed`, {
     headers: {
@@ -41,9 +43,7 @@ function parseHTMLSolutions(html: string): Record<string, CompletedKata> {
       Cookie: 'remember_user_token=' + REMEMBER_USER_TOKEN,
     },
   });
-  const html = await response.text();
-  await fs.promises.writeFile('first.html', html);
-  const katas = parseHTMLSolutions(html);
+  const katas = parseHTMLSolutions(await response.text());
 
   let page = 1;
   while (true) {

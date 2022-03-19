@@ -8,7 +8,7 @@ const jsonify: CompletedKataFormatter = async function jsonify(katas, directory)
     path.join(directory, `${Date.now()}.json`),
     JSON.stringify(
       Object.values(katas).sort((a, b) => {
-        const [at, bt] = [a, b].map(c => Math.min(...c.solutions.map(s => s.when.getTime())));
+        const [at, bt] = [a, b].map(c => Math.min(...c.solutions.map(({ when }) => when)));
         return at - bt;
       }),
       undefined,

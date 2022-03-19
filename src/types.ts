@@ -8,7 +8,7 @@ export interface CompletedKata {
 export interface Solution {
   content: string;
   language: string;
-  when: Date;
+  when: number;
 }
 
 export type CompletedKataFormatter = (katas: Record<string, CompletedKata>, directory: string) => Promise<void>

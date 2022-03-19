@@ -3,20 +3,9 @@ import fs from 'fs';
 import fetch from 'node-fetch';
 
 import { USER_NAME, USER_AGENT, REMEMBER_USER_TOKEN } from './constants';
+import type { CompletedKata } from './types';
 import { JSDOM } from 'jsdom';
-
-interface CompletedKata {
-  slug: string;
-  title: string;
-  rank: string;
-  solutions: Solution[];
-}
-
-interface Solution {
-  content: string;
-  language: string;
-  when: Date;
-}
+import formatKatas from './solution-formatters';
 
 function parseHTMLSolutions(html: string): Record<string, CompletedKata> {
   const { document } = new JSDOM(html).window;
@@ -45,18 +34,6 @@ function parseHTMLSolutions(html: string): Record<string, CompletedKata> {
       {},
     );
 }
-
-const LANGUAGE_EXTENSIONS: Record<string, string> = {
-  javascript: 'js',
-  typescript: 'ts',
-  python: 'py',
-  java: 'java',
-};
-
-const solutionFilename = (solution: Solution) => `${solution.language}.${LANGUAGE_EXTENSIONS[solution.language]}`;
-
-const capitalize = (string: string) => string[0].toUpperCase() + string.slice(1);
-
 (async () => {
   const response = await fetch(`https://www.codewars.com/users/${USER_NAME}/completed`, {
     headers: {
@@ -86,43 +63,5 @@ const capitalize = (string: string) => string[0].toUpperCase() + string.slice(1)
 
   console.log();
 
-  for (const dir of await fs.promises.readdir('solutions_output')) {
-    await fs.promises.rm(`solutions_output/${dir}`, { recursive: true });
-  }
-
-  for (const kata of Object.values(katas)) {
-    await fs.promises.mkdir(`solutions_output/${kata.slug}`);
-    for (const solution of Object.values(
-      kata.solutions.reduce((lang, sol) => {
-        const existing = lang[sol.language];
-        return {
-          ...lang,
-          [sol.language]: existing && existing.when > sol.when ? existing : sol,
-        };
-      }, {} as Record<string, Solution>),
-    )) {
-      await fs.promises.writeFile(`solutions_output/${kata.slug}/${solutionFilename(solution)}`, solution.content);
-    }
-    await fs.promises.writeFile(
-      `solutions_output/${kata.slug}/README.md`,
-      `# ${kata.rank} [${kata.title}]((https://www.codewars.com/kata/${kata.slug}))\n\n` +
-        kata.solutions.map(sol => `[${capitalize(sol.language)}](./${solutionFilename(sol)})`).join('\n'),
-    );
-  }
-
-  return fs.promises.writeFile(
-    `solutions_output/${Date.now()}.json`,
-    JSON.stringify(
-      Object.values(katas).sort((a, b) => {
-        const [at, bt] = [a, b].map(c => Math.min(...c.solutions.map(s => s.when.getTime())));
-        return at - bt;
-      }),
-      undefined,
-      '  ',
-    ),
-  );
+  return formatKatas(katas, './solutions_output');
 })().catch(console.error);
-
-// generate folder
-// generate readme
-// generate language.extension filenames

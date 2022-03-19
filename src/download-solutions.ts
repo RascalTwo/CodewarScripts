@@ -47,7 +47,7 @@ function parseHTMLSolutions(html: string): Record<string, CompletedKata> {
 
   let page = 1;
   while (true) {
-    process.stdout.write(`${page.toString().padStart(2, '0')} \r`);
+    process.stdout.write(`Page #${page.toString().padStart(2, '0')} \r`);
     const response = await fetch(`https://www.codewars.com/users/${USER_NAME}/completed_solutions?page=${page++}`, {
       headers: {
         'User-Agent': USER_AGENT,

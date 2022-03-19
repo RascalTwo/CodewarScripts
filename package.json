@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node dist/scrape.js",
+    "download-solutions": "node dist/download-solutions.js",
+    "download-clan-stats": "node dist/download-clan-stats.js",
     "build": "tsc"
   },
   "author": "",

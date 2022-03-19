@@ -46,7 +46,7 @@ async function getOwnInfo(): Promise<Entry> {
 
   let page = 1;
   while (true) {
-    process.stdout.write(`${page.toString().padStart(2, '0')} \r`);
+    process.stdout.write(`Page #${page.toString().padStart(2, '0')} \r`);
     const response = await fetch(`https://www.codewars.com/users/${USER_NAME}/allies?page=${page++}`, {
       headers: {
         'x-requested-with': 'XMLHttpRequest',
@@ -62,7 +62,7 @@ async function getOwnInfo(): Promise<Entry> {
 
   console.log();
   return fs.promises.writeFile(
-    `output/${Date.now()}.json`,
+    `clan_output/${Date.now()}.json`,
     JSON.stringify(
       Object.values(rows).sort((a, b) => b.honor - a.honor),
       undefined,

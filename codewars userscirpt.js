@@ -2,49 +2,39 @@
 // @name        Codewars Clan Leaderboard
 // @match       https://www.codewars.com/*
 // @grant       none
-// @version     1.0
+// @version     2.0
 // @author      Rascal_Two
 // ==/UserScript==
 
 (async () => {
-	console.log('[R2 Codewars Clan Leaderboard Loaded]')
+	const delay = () => new Promise(r => setTimeout(r, 10000));
+	const log = (...args) => console.log('[R2 Codewars Clan Leaderboard Loaded]', ...args);
 
-	const self = (() => {
+	function parseSelf() {
 		const wrapper = document.querySelector('.profile-points');
 		if (!wrapper) return null;
 
 		return {
 			rank: wrapper.children[0].textContent,
-			honor: +wrapper.children[1].textContent,
+			honor: +wrapper.children[1].textContent.replace(/,/g, ''),
 			username: document.querySelector('#header_profile_link').href.split('/').at(-1),
 			rankClass: wrapper.children[1].className,
 			avatarImage: document.querySelector('.profile-pic img').src
 		}
-	})();
+	}
+
+	;
+
+	const self = parseSelf();
 
 	let nth = 1;
-	let { pathname } = window.location;
 
-	window.addEventListener('hashchange', console.log)
-
-	while (true) {
-		await new Promise(r => setTimeout(r, 1000));
-		if (!window.location.pathname.match(/users\/.*\/(allies|following|followers)/)) {
-			nth = 1;
-			continue;
-		}
-
-		if (pathname !== window.location.pathname){
-			nth = 1;
-			pathname = window.location.pathname;
-		}
-
-		for (const row of document.querySelectorAll('tr[data-username]:not([data-r2-done])')) {
-			row.dataset.r2Done = true;
+	function processTable(table) {
+		for (const row of table.querySelectorAll('tr[data-username]')) {
 			const honor = +row.children[2].textContent;
 			if (self && honor >= self.honor && (row.nextSibling && +row.nextSibling.children[2].textContent <= self.honor)) {
 				const selfRow = document.createElement('tr')
-				selfRow.innerHTML = `<tr data-username="${self.username}" data-r2-done="true">
+				selfRow.innerHTML = `<tr data-username="${self.username}">
 					<td>#${nth++}</td>
 					<td class="is-big">
 						<div class="${self.rankClass} float-left mt-5px mr-5">
@@ -63,10 +53,36 @@
 					</td>
 					<td>${self.honor}</td>
 				</tr>`
-				selfRow.dataset.r2Done = true;
 				row.parentNode.insertBefore(selfRow, row.nextSibling)
 			}
 			row.innerHTML = `<td>#${nth++}</td>` + row.innerHTML;
 		}
+		log('Table processed')
 	}
+
+	const observer = new MutationObserver((records) => {
+		for (const record of records) {
+			for (const node of record.addedNodes) {
+				if (node.classList.contains('leaderboard')) processTable(node);
+			}
+		}
+	});
+
+	let pathname = null;
+	function start(){
+		log('Table found, attached');
+		const root = document.querySelector('.leaderboard')
+		observer.observe(root, { childList: true, subtree: true });
+		processTable(root);
+	}
+	new MutationObserver(() => {
+		const newPathname = window.location.pathname;
+		if (newPathname === pathname) return;
+		pathname = newPathname;
+		nth = 1;
+		observer.disconnect();
+		if (!pathname.match(/users\/.*\/(allies|following|followers)/)) return;
+
+		setTimeout(start, 2500);
+	}).observe(document, {subtree: true, childList: true});
 })();

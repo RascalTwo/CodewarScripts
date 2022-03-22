@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { generateCommentLine, getKataURL, getLanguageExtension } from '../helpers';
+import { FORMATTER__DAILY_FILES__COMMIT_PER_KATA } from '../constants';
 
 import simpleGit, { SimpleGit, SimpleGitOptions } from 'simple-git';
 
@@ -33,6 +34,9 @@ const dailyFiles: CompletedKataFormatter = async function dailyFiles(katas, dire
       };
     }, {} as Record<string, Solution[]>);
     for (const [language, solutions] of Object.entries(languageSolutions)) {
+      const filename = date + '.' + getLanguageExtension(language);
+      const filepath = path.join(directory, filename);
+
       let solutionLines = [];
       const sortedWithKatas = solutions
         .sort((a, b) => a.when - b.when)
@@ -44,15 +48,27 @@ const dailyFiles: CompletedKataFormatter = async function dailyFiles(katas, dire
             solution.content,
           ].join('\n'),
         );
+        if (!FORMATTER__DAILY_FILES__COMMIT_PER_KATA) continue;
+
+        await fs.promises.writeFile(filepath, solutionLines.join('\n\n\n'));
+
+        const writeTime = new Date(solution.when).toISOString();
+        const oldValue = process.env.GIT_COMMITTER_DATE;
+        process.env.GIT_COMMITTER_DATE = writeTime;
+        await git.add(filename).commit(`Add "${kata.title}" challenge`, [], {
+          '--date': writeTime,
+        });
+        process.env.GIT_COMMITTER_DATE = oldValue;
       }
 
-      const filename = date + '.' + getLanguageExtension(language);
-      await fs.promises.writeFile(path.join(directory, filename), solutionLines.join('\n\n\n'));
+      if (FORMATTER__DAILY_FILES__COMMIT_PER_KATA) continue;
+
+      await fs.promises.writeFile(filepath, solutionLines.join('\n\n\n'));
 
       const writeTime = new Date(sortedWithKatas.at(-1)!.solution.when).toISOString();
       const oldValue = process.env.GIT_COMMITTER_DATE;
       process.env.GIT_COMMITTER_DATE = writeTime;
-      await git.add(filename).commit(`Add ${date} challenges`, [], {
+      await git.add(filename).commit(`Add ${date} challenge${sortedWithKatas.length === 1 ? '' : 's'}`, [], {
         '--date': writeTime,
       });
       process.env.GIT_COMMITTER_DATE = oldValue;

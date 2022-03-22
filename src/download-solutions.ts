@@ -23,7 +23,7 @@ function parseHTMLSolutions(html: string): Record<string, CompletedKata> {
             language: div.querySelector('code')?.dataset.language!,
             when: new Date(div.nextElementSibling!.querySelector('time-ago')!.getAttribute('datetime')!)!,
           };
-        }),
+        }).sort((a, b) => a.when.getTime() - b.when.getTime()),
       };
     })
     .reduce(

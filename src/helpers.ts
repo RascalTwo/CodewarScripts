@@ -10,6 +10,8 @@ export function getLanguageExtension(language: string) {
       return 'py';
     case 'java':
       return 'java';
+    case 'csharp':
+      return 'cs';
     default:
       throw new Error(`Unhandled language extension: ${language}`);
   }
@@ -23,6 +25,8 @@ export const generateCommentLine = (language: string, content: string) => {
       return '//\t' + content;
     case 'python':
       return '#\t' + content;
+    case 'csharp':
+      return '//\t' + content;
     default:
       throw new Error(`Unhandled language comment: ${language}`);
   }

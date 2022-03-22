@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { generateCommentLine, getKataURL, getLanguageExtension } from '../helpers';
+import { generateCommentLine, getKataURL, getLanguageExtension, setEnvironmentVariable } from '../helpers';
 import { FORMATTER__DAILY_FILES__COMMIT_PER_KATA } from '../constants';
 
 import simpleGit, { SimpleGit, SimpleGitOptions } from 'simple-git';
@@ -17,15 +17,21 @@ const dailyFiles: CompletedKataFormatter = async function dailyFiles(katas, dire
   const git = simpleGit({ baseDir: directory });
   await git.init();
 
+  let done = 0;
+  let total = 0
+
   const solutionKatas = new Map<number, CompletedKata>();
   const dates: Record<string, Solution[]> = {};
   for (const kata of Object.values(katas)) {
     for (const solution of kata.solutions) {
+      total++;
+
       const date = formatDay(new Date(solution.when));
       dates[date] = [...(dates[date] || []), solution];
       solutionKatas.set(solution.when, kata);
     }
   }
+
   for (const [date, solutions] of Object.entries(dates).sort((a, b) => a[0].localeCompare(b[0]))) {
     const languageSolutions = solutions.reduce((languages, solution) => {
       return {
@@ -42,6 +48,8 @@ const dailyFiles: CompletedKataFormatter = async function dailyFiles(katas, dire
         .sort((a, b) => a.when - b.when)
         .map(solution => ({ solution, kata: solutionKatas.get(solution.when)! }));
       for (const { solution, kata } of sortedWithKatas) {
+        process.stdout.write(`${((done++ / total) * 100).toFixed(2)}%       \r`);
+
         solutionLines.push(
           [
             ...[kata.rank, kata.title, getKataURL(kata)].map(generateCommentLine.bind(null, language)),
@@ -53,12 +61,12 @@ const dailyFiles: CompletedKataFormatter = async function dailyFiles(katas, dire
         await fs.promises.writeFile(filepath, solutionLines.join('\n\n\n'));
 
         const writeTime = new Date(solution.when).toISOString();
-        const oldValue = process.env.GIT_COMMITTER_DATE;
-        process.env.GIT_COMMITTER_DATE = writeTime;
-        await git.add(filename).commit(`Add "${kata.title}" challenge`, [], {
-          '--date': writeTime,
-        });
-        process.env.GIT_COMMITTER_DATE = oldValue;
+
+        await setEnvironmentVariable('GIT_COMMITTER_DATE', writeTime, () =>
+          git.add(filename).commit(`Add "${kata.title}" challenge`, [], {
+            '--date': writeTime,
+          }),
+        );
       }
 
       if (FORMATTER__DAILY_FILES__COMMIT_PER_KATA) continue;
@@ -66,14 +74,15 @@ const dailyFiles: CompletedKataFormatter = async function dailyFiles(katas, dire
       await fs.promises.writeFile(filepath, solutionLines.join('\n\n\n'));
 
       const writeTime = new Date(sortedWithKatas.at(-1)!.solution.when).toISOString();
-      const oldValue = process.env.GIT_COMMITTER_DATE;
-      process.env.GIT_COMMITTER_DATE = writeTime;
-      await git.add(filename).commit(`Add ${date} challenge${sortedWithKatas.length === 1 ? '' : 's'}`, [], {
-        '--date': writeTime,
-      });
-      process.env.GIT_COMMITTER_DATE = oldValue;
+      await setEnvironmentVariable('GIT_COMMITTER_DATE', writeTime, () =>
+        git.add(filename).commit(`Add ${date} challenge${sortedWithKatas.length === 1 ? '' : 's'}`, [], {
+          '--date': writeTime,
+        }),
+      );
     }
   }
+
+  console.log()
 };
 
 export const DIRECTORY_NAME = 'daily-files';

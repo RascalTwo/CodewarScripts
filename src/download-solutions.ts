@@ -37,7 +37,7 @@ function parseHTMLSolutions(html: string): Record<string, CompletedKata> {
 
 
 (async () => {
-  const response = await fetch(`https://www.codewars.com/users/${USER_NAME}/completed`, {
+  const response = await fetch(`https://www.codewars.com/users/${USER_NAME}/completed_solutions`, {
     headers: {
       'User-Agent': USER_AGENT,
       Cookie: 'remember_user_token=' + REMEMBER_USER_TOKEN,

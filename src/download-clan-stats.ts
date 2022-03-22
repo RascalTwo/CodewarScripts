@@ -30,7 +30,7 @@ async function getOwnInfo(): Promise<Entry> {
   const document = new JSDOM(await response.text()).window.document;
   return {
     rank: document.querySelector('.stat-container .stat')!.childNodes[1].textContent!,
-    honor: +document.querySelector('.stat-container .stat:nth-of-type(2)')!.childNodes[1].textContent!,
+    honor: +document.querySelector('.stat-container .stat:nth-of-type(2)')!.childNodes[1].textContent!.replace(/,/g, '')!,
     username: USER_NAME,
   };
 }

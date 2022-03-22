@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { generateCommentLine, getKataURL, getLanguageExtension, setEnvironmentVariable } from '../helpers';
-import { FORMATTER__DAILY_FILES__COMMIT_PER_KATA } from '../constants';
+import { FORMATTERS__DISABLE_GIT, FORMATTER__DAILY_FILES__COMMIT_PER_KATA } from '../constants';
 
 import simpleGit, { SimpleGit, SimpleGitOptions } from 'simple-git';
 
@@ -15,7 +15,7 @@ const formatDay = (date: Date) =>
 
 const dailyFiles: CompletedKataFormatter = async function dailyFiles(katas, directory) {
   const git = simpleGit({ baseDir: directory });
-  await git.init();
+  if (!FORMATTERS__DISABLE_GIT) await git.init();
 
   let done = 0;
   let total = 0
@@ -56,7 +56,7 @@ const dailyFiles: CompletedKataFormatter = async function dailyFiles(katas, dire
             solution.content,
           ].join('\n'),
         );
-        if (!FORMATTER__DAILY_FILES__COMMIT_PER_KATA) continue;
+        if (FORMATTERS__DISABLE_GIT || !FORMATTER__DAILY_FILES__COMMIT_PER_KATA) continue;
 
         await fs.promises.writeFile(filepath, solutionLines.join('\n\n\n'));
 
@@ -68,10 +68,9 @@ const dailyFiles: CompletedKataFormatter = async function dailyFiles(katas, dire
           }),
         );
       }
-
-      if (FORMATTER__DAILY_FILES__COMMIT_PER_KATA) continue;
-
       await fs.promises.writeFile(filepath, solutionLines.join('\n\n\n'));
+
+      if (FORMATTERS__DISABLE_GIT || FORMATTER__DAILY_FILES__COMMIT_PER_KATA) continue;
 
       const writeTime = new Date(sortedWithKatas.at(-1)!.solution.when).toISOString();
       await setEnvironmentVariable('GIT_COMMITTER_DATE', writeTime, () =>

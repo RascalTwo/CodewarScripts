@@ -1,13 +1,14 @@
 import fs from 'fs';
 import path from 'path';
 import simpleGit from 'simple-git';
+import { FORMATTERS__DISABLE_GIT } from '../constants';
 import { languageFilename, capitalize, getKataURL, setEnvironmentVariable, getLanguageName } from '../helpers';
 
 import { CompletedKata, CompletedKataFormatter, Solution } from '../types';
 
 const kataSlugDirectories: CompletedKataFormatter = async function kataSlugDirectories(katas, directory) {
   const git = simpleGit({ baseDir: directory });
-  await git.init();
+  if (!FORMATTERS__DISABLE_GIT) await git.init();
 
   let done = 0;
   let total = 0;
@@ -36,7 +37,7 @@ const kataSlugDirectories: CompletedKataFormatter = async function kataSlugDirec
       const firstOfKata = !fs.existsSync(kataDir);
 
       const languagePath = path.join(kataDir, languageFilename(solution.language));
-      const firstOfLanguage = fs.existsSync(languagePath);
+      const firstOfLanguage = !fs.existsSync(languagePath);
       if (firstOfKata) await fs.promises.mkdir(kataDir);
       await fs.promises.writeFile(languagePath, solution.content);
 
@@ -51,6 +52,7 @@ const kataSlugDirectories: CompletedKataFormatter = async function kataSlugDirec
         await fs.promises.appendFile(readmePath, '\n' + languageMarkdownLink);
       }
 
+      if (FORMATTERS__DISABLE_GIT) continue;
       const writeTime = new Date(solution.when).toISOString();
       await setEnvironmentVariable('GIT_COMMITTER_DATE', writeTime, () =>
         git

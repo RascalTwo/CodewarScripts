@@ -11,6 +11,7 @@ function parseHTMLUsernames(html: string): Record<string, Entry> {
       rank: row.querySelector('span')!.textContent!.trim(),
       username: row.dataset.username!,
       honor: +row.children.item(2)!.textContent!,
+      clan: row.children.item(1)!.textContent!.trim()
     };
     return {
       ...usernames,
@@ -23,6 +24,7 @@ interface Entry {
   rank: string;
   honor: number;
   username: string;
+  clan: string;
 }
 
 async function getOwnInfo(): Promise<Entry> {
@@ -30,8 +32,13 @@ async function getOwnInfo(): Promise<Entry> {
   const document = new JSDOM(await response.text()).window.document;
   return {
     rank: document.querySelector('.stat-container .stat')!.childNodes[1].textContent!,
-    honor: +document.querySelector('.stat-container .stat:nth-of-type(2)')!.childNodes[1].textContent!.replace(/,/g, '')!,
+    honor: +document
+      .querySelector('.stat-container .stat:nth-of-type(2)')!
+      .childNodes[1].textContent!.replace(/,/g, '')!,
     username: USER_NAME,
+    clan: [...document.querySelector('.user-profile .stat-box > .stat:nth-of-type(2)')?.childNodes!]
+      .at(-1)
+      ?.textContent!.trim()!,
   };
 }
 

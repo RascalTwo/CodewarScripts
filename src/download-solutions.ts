@@ -21,9 +21,9 @@ function parseHTMLSolutions(html: string): Record<string, CompletedKata> {
           return {
             content: div.textContent!,
             language: div.querySelector('code')?.dataset.language!,
-            when: new Date(div.nextElementSibling!.querySelector('time-ago')!.getAttribute('datetime')!)!,
+            when: new Date(div.nextElementSibling!.querySelector('time-ago')!.getAttribute('datetime')!)!.getTime(),
           };
-        }).sort((a, b) => a.when.getTime() - b.when.getTime()),
+        }).sort((a, b) => a.when - b.when),
       };
     })
     .reduce(

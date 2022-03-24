@@ -16,12 +16,18 @@ npm run build
 These environment variables are needed to allow the scripts to access your pages:
 
 ```shell
-REMEMBER_USER_TOKEN=Value of `remember_user_token` Cookie
 USER_AGENT=Your User Agent
+REMEMBER_USER_TOKEN=Value of `remember_user_token` Cookie
 USER_NAME=Your Username
 ```
 
+> There exists a `.env.example` you can use as a template for your own `.env` file, which will read environment variables from automatically.
+
 ## Scripts
+
+### Fetch Credentials
+
+If you'd rather not manually obtain your `USER_NAME` and `REMEMBER_USER_TOKEN` values, you can instead set the `EMAIL` and `PASSWORD` environment variables to have these fetched for you.
 
 ### Download Solutions
 

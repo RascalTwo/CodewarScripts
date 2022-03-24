@@ -7,6 +7,7 @@
     "download-solutions": "node dist/download-solutions.js",
     "format-solutions": "node dist/format-solutions.js",
     "download-clan-stats": "node dist/download-clan-stats.js",
+    "fetch-credentials": "node dist/fetch-credentials.js",
     "build": "tsc"
   },
   "author": "",
@@ -22,5 +23,8 @@
   "devDependencies": {
     "@types/jsdom": "^16.2.14",
     "@types/node-fetch": "^3.0.3"
+  },
+  "optionalDependencies": {
+    "playwright": "^1.18.1"
   }
 }

@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "download-solutions": "node dist/download-solutions.js",
+    "format-solutions": "node dist/format-solutions.js",
     "download-clan-stats": "node dist/download-clan-stats.js",
     "build": "tsc"
   },

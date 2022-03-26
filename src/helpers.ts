@@ -12,6 +12,12 @@ export function getLanguageExtension(language: string) {
       return 'java';
     case 'csharp':
       return 'cs';
+    case 'cpp':
+      return 'cpp'
+    case 'lua':
+      return 'lua'
+    case 'shell':
+      return 'sh'
     default:
       throw new Error(`Unhandled language extension: ${language}`);
   }
@@ -27,6 +33,12 @@ export const getLanguageName = (language: string) => {
       return 'Python'
     case 'csharp':
       return 'C#'
+    case 'cpp':
+      return 'C++'
+    case 'lua':
+      return 'Lua'
+    case 'shell':
+      return 'Shell'
     default:
       throw new Error(`Unhandled language name: ${language}`);
   }
@@ -42,6 +54,12 @@ export const generateCommentLine = (language: string, content: string) => {
       return '#\t' + content;
     case 'csharp':
       return '//\t' + content;
+    case 'cpp':
+      return '//\t' + content
+    case 'lua':
+      return '--\t' + content
+    case 'shell':
+      return '#\t' + content
     default:
       throw new Error(`Unhandled language comment: ${language}`);
   }

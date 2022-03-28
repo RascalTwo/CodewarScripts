@@ -1,5 +1,16 @@
 import { CompletedKata, CompletedKataFormatter, Solution } from './types';
 
+export function formatLanguageTestCode(language: string, code: string){
+  switch (language){
+    case 'javascript':
+      return `;(() => {\n\t${code.split('\n').join('\n\t')}\n})();`
+    case 'typescript':
+      return `;(() => {\n\t${code.split('\n').join('\n\t')}\n})();`
+    default:
+      return code;
+  }
+}
+
 export function getLanguageExtension(language: string) {
   switch (language) {
     case 'javascript':

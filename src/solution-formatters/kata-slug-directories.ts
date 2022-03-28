@@ -44,10 +44,18 @@ const kataSlugDirectories: CompletedKataFormatter = async function kataSlugDirec
     if (firstOfKata) {
       await fs.promises.writeFile(
         readmePath,
-        `# ${kata.rank} [${kata.title}](${getKataURL(kata)})\n\n` + languageMarkdownLink,
+        `# ${kata.rank} [${kata.title}](${getKataURL(kata)})\n\n<!-- START LANGUAGE_LINKS -->\n\n` +
+          languageMarkdownLink +
+          '\n\n<!-- END LANGUAGE_LINKS -->\n\n' +
+          kata.info[solution.language].description,
       );
     } else if (firstOfLanguage) {
-      await fs.promises.appendFile(readmePath, '\n' + languageMarkdownLink);
+      const currentContent = (await fs.promises.readFile(readmePath)).toString();
+      const oldLinks = currentContent.split('<!-- START LANGUAGE_LINKS -->')[1].split('<!-- END LANGUAGE_LINKS -->')[0];
+      await fs.promises.writeFile(
+        readmePath,
+        currentContent.replace(oldLinks, oldLinks + languageMarkdownLink + '\n\n'),
+      );
     }
 
     if (FORMATTERS__DISABLE_GIT) continue;

@@ -61,6 +61,8 @@ npm run format-solutions
 
 If the formatters are running too slow, or you wish to not create git repositories, you can set the `FORMATTERS__DISABLE_GIT` environment variable.
 
+When applicable, formatters will append the test code from the Kata to the solution code; this can be disabled by clearing the `FORMATTERS__SUFFIX_TEST_CODE` environment variable.
+
 ##### `json`
 
 A epoch-names JSON file with the raw solution data.
@@ -80,6 +82,6 @@ The `FORMATTER__DAILY_FILES__COMMIT_PER_KATA` environment variable determines if
 - `kata-id`
   - `language.ext`
   - `README.md`
-    - The basic Kata information and relative markdown links to each solution file.
+    - The basic Kata information, relative markdown links to each solution file, and description from the first language the Fata was solved in.
 
 Creates a git repo with all commits properly dated to match the solution creation time.

@@ -1,8 +1,15 @@
+export interface KataLanguageInfo {
+  description: string;
+  testCode: string
+}
+
+
 export interface CompletedKata {
   slug: string;
   title: string;
   rank: string;
   solutions: Solution[];
+  info: Record<string, KataLanguageInfo>
 }
 
 export interface Solution {

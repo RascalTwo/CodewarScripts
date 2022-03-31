@@ -2,12 +2,11 @@
 // @name        Codewars Clan Leaderboard
 // @match       https://www.codewars.com/*
 // @grant       none
-// @version     2.0
+// @version     3.0
 // @author      Rascal_Two
 // ==/UserScript==
 
 (async () => {
-	const delay = () => new Promise(r => setTimeout(r, 10000));
 	const log = (...args) => console.log('[R2 Codewars Clan Leaderboard Loaded]', ...args);
 
 	function parseSelf() {
@@ -18,21 +17,20 @@
 			rank: wrapper.children[0].textContent,
 			honor: +wrapper.children[1].textContent.replace(/,/g, ''),
 			username: document.querySelector('#header_profile_link').href.split('/').at(-1),
-			rankClass: wrapper.children[1].className,
+			rankClass: wrapper.children[0].className,
 			avatarImage: document.querySelector('.profile-pic img').src
 		}
 	}
 
-	;
-
-	const self = parseSelf();
-
+	let self = parseSelf();
 	let nth = 1;
 
 	function processTable(table) {
 		for (const row of table.querySelectorAll('tr[data-username]')) {
 			const honor = +row.children[2].textContent;
+			row.innerHTML = `<td>#${nth++}</td>` + row.innerHTML;
 			if (self && honor >= self.honor && (row.nextSibling && +row.nextSibling.children[2].textContent <= self.honor)) {
+				console.log(honor, self.honor, +row.nextSibling.children[2].textContent);
 				const selfRow = document.createElement('tr')
 				selfRow.innerHTML = `<tr data-username="${self.username}">
 					<td>#${nth++}</td>
@@ -55,7 +53,6 @@
 				</tr>`
 				row.parentNode.insertBefore(selfRow, row.nextSibling)
 			}
-			row.innerHTML = `<td>#${nth++}</td>` + row.innerHTML;
 		}
 		log('Table processed')
 	}
@@ -69,7 +66,7 @@
 	});
 
 	let pathname = null;
-	function start(){
+	function start() {
 		log('Table found, attached');
 		const root = document.querySelector('.leaderboard')
 		observer.observe(root, { childList: true, subtree: true });
@@ -80,9 +77,11 @@
 		if (newPathname === pathname) return;
 		pathname = newPathname;
 		nth = 1;
+		self = parseSelf();
+
 		observer.disconnect();
 		if (!pathname.match(/users\/.*\/(allies|following|followers)/)) return;
 
 		setTimeout(start, 2500);
-	}).observe(document, {subtree: true, childList: true});
+	}).observe(document, { subtree: true, childList: true });
 })();

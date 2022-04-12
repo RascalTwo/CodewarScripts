@@ -6,6 +6,8 @@ export function formatLanguageTestCode(language: string, code: string){
       return `;(() => {\n\t${code.split('\n').join('\n\t')}\n})();`
     case 'typescript':
       return `;(() => {\n\t${code.split('\n').join('\n\t')}\n})();`
+    case 'sql':
+      return '';
     default:
       return code;
   }
@@ -33,6 +35,8 @@ export function getLanguageExtension(language: string) {
       return 'php'
     case 'ruby':
       return 'rb'
+    case 'sql':
+      return 'sql'
     default:
       throw new Error(`Unhandled language extension: ${language}`);
   }
@@ -42,6 +46,8 @@ export const getLanguageName = (language: string) => {
   switch (language) {
     case 'javascript':
       return 'JavaScript'
+    case 'typescript':
+      return 'TypeScript'
     case 'java':
       return 'Java'
     case 'python':
@@ -58,6 +64,8 @@ export const getLanguageName = (language: string) => {
       return 'PHP'
     case 'ruby':
       return 'Ruby'
+    case 'sql':
+      return 'SQL'
     default:
       throw new Error(`Unhandled language name: ${language}`);
   }
@@ -66,6 +74,8 @@ export const getLanguageName = (language: string) => {
 export const generateCommentLine = (language: string, content: string) => {
   switch (language) {
     case 'javascript':
+      return '//\t' + content;
+    case 'typescript':
       return '//\t' + content;
     case 'java':
       return '//\t' + content;
@@ -83,6 +93,8 @@ export const generateCommentLine = (language: string, content: string) => {
       return '//\t' + content
     case 'ruby':
       return '#\t' + content
+    case 'sql':
+      return '--\t' + content
     default:
       throw new Error(`Unhandled language comment: ${language}`);
   }

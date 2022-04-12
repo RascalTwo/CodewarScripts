@@ -39,6 +39,16 @@ npm run download-solutions
 
 > Automatically runs solution formatter script after
 
+***
+
+To ignore some solutions, you can copy the `datetime` from it's `<time-ago>` HTML element:
+
+```html
+<time-ago datetime="2000-01-01T05:00:00.000+0000" ...>XYZ ago</time-ago>
+```
+
+and add these to the `IGNORE_SOLUTIONS` environment variable comma-seperated.
+
 ### Download Clan Stats
 
 Download your clan stats as a new JSON to `clan_output`

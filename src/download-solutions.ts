@@ -3,7 +3,7 @@ import path from 'path';
 // @ts-ignore
 import fetch from 'node-fetch';
 
-import { USER_NAME, USER_AGENT, REMEMBER_USER_TOKEN } from './constants';
+import { USER_NAME, USER_AGENT, REMEMBER_USER_TOKEN, IGNORE_SOLUTIONS } from './constants';
 import type { CompletedKata } from './types';
 import { JSDOM } from 'jsdom';
 import formatKatas from './solution-formatters';
@@ -42,11 +42,11 @@ function parseHTMLSolutions(html: string): Record<string, CompletedKata> {
         slug: anchor.href.split('/').at(-1)!,
         title: anchor.textContent!,
         rank: anchor.parentNode?.children[0].textContent!,
-        solutions: Array.from(rawSolutions.querySelectorAll('.markdown')).map(div => {
+        solutions: Array.from(rawSolutions.querySelectorAll('.markdown')).map(div => ({ div, datetime: div.nextElementSibling!.querySelector('time-ago')!.getAttribute('datetime')! })).filter(({ datetime }) => !IGNORE_SOLUTIONS.has(datetime)).map(({ div, datetime }) => {
           return {
             content: div.textContent!,
             language: div.querySelector('code')?.dataset.language!,
-            when: new Date(div.nextElementSibling!.querySelector('time-ago')!.getAttribute('datetime')!)!.getTime(),
+            when: new Date(datetime)!.getTime(),
           };
         }).sort((a, b) => a.when - b.when),
       };

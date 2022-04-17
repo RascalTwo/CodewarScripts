@@ -29,6 +29,8 @@ USER_NAME=Your Username
 
 If you'd rather not manually obtain your `USER_NAME` and `REMEMBER_USER_TOKEN` values, you can instead set the `EMAIL` and `PASSWORD` environment variables to have these fetched for you.
 
+> npm run fetch-credentials
+
 ### Download Solutions
 
 Download all your solutions to `solutions_output` in various formats

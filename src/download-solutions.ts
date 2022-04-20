@@ -119,7 +119,7 @@ const fetchPage = async (page: number, cache: boolean) => {
     kata.info = {};
     for (const solution of kata.solutions) {
       process.stdout.write(`${((current++ / total) * 100).toFixed(2)}%      \r`);
-      const { description, testCode, vote, voteID, csrfToken } = await getKataLanguageInfo(
+      const { description, testCode, upvotes, vote, voteID, csrfToken } = await getKataLanguageInfo(
         kata.slug,
         solution.language,
       );
@@ -127,6 +127,7 @@ const fetchPage = async (page: number, cache: boolean) => {
       kata.vote = vote;
       if (voteID) kata.voteID = voteID;
       kata.csrfToken = csrfToken;
+      kata.upvotes = upvotes;
     }
   }
 

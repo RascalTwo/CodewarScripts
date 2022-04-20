@@ -127,7 +127,10 @@ export function parseKataLanguageInfo(html: string){
     description: data.description,
     vote: data.vote,
     voteID: script.textContent!.split('"challenge_vote":"')[1].split('"')[0].split('/').at(-1),
-    csrfToken: jsdom.window.document.querySelector('[name="csrf-token"]')!.getAttribute('content')!
+    csrfToken: jsdom.window.document.querySelector('[name="csrf-token"]')!.getAttribute('content')!,
+    upvotes: [...jsdom.window.document.querySelectorAll('.vote-label')!].map(
+      anchor => +anchor.childNodes[anchor.childNodes.length - 1].textContent!,
+    ) as [number,number],
   };
 }
 

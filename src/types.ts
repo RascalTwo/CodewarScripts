@@ -14,6 +14,7 @@ export interface CompletedKata {
   vote: KataVote
   voteID: string
   csrfToken: string
+  upvotes: [number, number]
 }
 
 export interface Solution {

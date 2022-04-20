@@ -77,7 +77,7 @@ const fetchPage = async (page: number, cache: boolean) => {
   const cachePath = path.join('cache', `page-${page}.html`);
 
   let html;
-  if (!fs.existsSync(cachePath)) {
+  if (!cache || !fs.existsSync(cachePath)) {
     html = await fetch(`https://www.codewars.com/users/${USER_NAME}/completed_solutions?page=${page++}`, {
       headers: {
         'User-Agent': USER_AGENT,
@@ -95,7 +95,7 @@ const fetchPage = async (page: number, cache: boolean) => {
 
 (async () => {
   const CACHE_PAGES = process.argv.includes('--cache-pages');
-  console.log('Downloading solutions...');
+  console.log('Downloading solutions...', CACHE_PAGES ? '(Using Cache)' : '');
 
   const katas = await fetchFirstPage(CACHE_PAGES);
 

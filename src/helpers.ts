@@ -106,7 +106,7 @@ export const generateCommentLine = (language: string, content: string) => {
 
 
 export async function fetchKataLanguageInfo(slug: string, language: string) {
-  return await fetch(`https://www.codewars.com/kata/${slug}/solutions/${language}`, {
+  return await fetch(`https://www.codewars.com/kata/${slug}/solutions/${language}/me`, {
 			headers: {
 				'User-Agent': USER_AGENT,
 				Cookie: 'remember_user_token=' + REMEMBER_USER_TOKEN,

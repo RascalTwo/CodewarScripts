@@ -2,12 +2,13 @@
 // @name        Codewars Clan Leaderboard
 // @match       https://www.codewars.com/*
 // @grant       none
-// @version     3.0
+// @version     1.1
 // @author      Rascal_Two
 // ==/UserScript==
 
+
 (async () => {
-	const log = (...args) => console.log('[R2 Codewars Clan Leaderboard Loaded]', ...args);
+	const log = (...args) => console.log('[R2 Codewars Clan Leaderboard]', ...args);
 
 	function parseSelf() {
 		const wrapper = document.querySelector('.profile-points');
@@ -24,13 +25,45 @@
 
 	let self = parseSelf();
 	let nth = 1;
+	let seen = new Set();
+
+	let select = null;
+
+	function parseUserFromRow(row) {
+		const username = row.dataset.username;
+		const clan = row.children[row.children.length - 2].textContent.trim();
+		const honor = +row.children[row.children.length - 1].textContent.replace(/,/g, '');
+		return { username, honor, clan }
+	}
+
+	function isUserRowVisible({ clan, honor, username }) {
+		if (!select.value) return true;
+		return select.value === clan;
+	}
+
+	function updateVisibleUsers() {
+		for (const row of document.querySelectorAll('tr[data-username]')) {
+			row.style.display = isUserRowVisible(parseUserFromRow(row)) ? 'table-row' : 'none';
+		}
+	}
 
 	function processTable(table) {
 		for (const row of table.querySelectorAll('tr[data-username]')) {
-			const honor = +row.children[2].textContent;
+			const user = parseUserFromRow(row);
+			if (seen.has(user.username)) {
+				row.remove()
+				continue;
+			}
+			if (![...select.options].map(option => option.value).includes(user.clan)) {
+				const option = document.createElement('option');
+				option.textContent = user.clan;
+				select.appendChild(option);
+			}
+
+			row.style.display = isUserRowVisible(user) ? 'table-row' : 'none';
+
 			row.innerHTML = `<td>#${nth++}</td>` + row.innerHTML;
-			if (self && honor >= self.honor && (row.nextSibling && +row.nextSibling.children[2].textContent <= self.honor)) {
-				console.log(honor, self.honor, +row.nextSibling.children[2].textContent);
+			if (self && user.honor >= self.honor && (row.nextSibling && parseUserFromRow(row.nextSibling).honor <= self.honor)) {
 				const selfRow = document.createElement('tr')
 				selfRow.innerHTML = `<tr data-username="${self.username}">
 					<td>#${nth++}</td>
@@ -70,6 +103,22 @@
 		log('Table found, attached');
 		const root = document.querySelector('.leaderboard')
 		observer.observe(root, { childList: true, subtree: true });
+
+		const tbody = root.querySelector('tbody');
+		const controls = document.createElement('tr')
+		controls.insertCell(-1)
+		controls.insertCell(-1)
+		const clanFilter = controls.insertCell(-1)
+		select = document.createElement('select')
+		select.style.textAlign = 'center';
+		select.style.color = 'black';
+		select.style.width = '5ch';
+		select.style.height = '3ch';
+		select.innerHTML = '<option value="" selected>All</option>';
+		select.addEventListener('change', updateVisibleUsers);
+		clanFilter.appendChild(select);
+		tbody.prepend(controls)
+
 		processTable(root);
 	}
 	new MutationObserver(() => {
@@ -82,6 +131,6 @@
 		observer.disconnect();
 		if (!pathname.match(/users\/.*\/(allies|following|followers)/)) return;
 
-		setTimeout(start, 2500);
+		setTimeout(start, 5000);
 	}).observe(document, { subtree: true, childList: true });
 })();

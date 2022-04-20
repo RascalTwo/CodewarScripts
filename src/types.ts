@@ -3,6 +3,7 @@ export interface KataLanguageInfo {
   testCode: string
 }
 
+export type KataVote = -1 | 0 | 1 | null;
 
 export interface CompletedKata {
   slug: string;
@@ -10,6 +11,9 @@ export interface CompletedKata {
   rank: string;
   solutions: Solution[];
   info: Record<string, KataLanguageInfo>
+  vote: KataVote
+  voteID: string
+  csrfToken: string
 }
 
 export interface Solution {

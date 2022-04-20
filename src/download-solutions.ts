@@ -7,29 +7,20 @@ import { USER_NAME, USER_AGENT, REMEMBER_USER_TOKEN, IGNORE_SOLUTIONS } from './
 import type { CompletedKata } from './types';
 import { JSDOM } from 'jsdom';
 import formatKatas from './solution-formatters';
+import { fetchKataLanguageInfo, parseKataLanguageInfo } from './helpers';
 
 
 async function getKataLanguageInfo(slug: string, language: string) {
 	let html;
 	const cachePath = path.join('cache', `${slug}-${language}.html`)
 	if (!fs.existsSync(cachePath)) {
-		html = await fetch(`https://www.codewars.com/kata/${slug}/solutions/${language}`, {
-			headers: {
-				'User-Agent': USER_AGENT,
-				Cookie: 'remember_user_token=' + REMEMBER_USER_TOKEN,
-			},
-		}).then((r: any) => r.text());
+		html = await fetchKataLanguageInfo(slug, language);
 		await fs.promises.writeFile(cachePath, html);
 	} else {
 		html = (await fs.promises.readFile(cachePath)).toString()
 	}
-  const jsdom = new JSDOM(html);
-  const testCode = jsdom.window.document.querySelector('#fixture_panel code')!.textContent!;
-  const script = Array.from(jsdom.window.document.querySelectorAll('script')).find(script =>
-    script.textContent?.includes('data: JSON.parse('),
-  );
-  const { description } = JSON.parse(JSON.parse(script?.textContent?.match(/JSON\.parse\("(.*)"\)/g)![1].match(/JSON\.parse\((.*)\)/)![1]!));
-  return { testCode, description };
+
+  return parseKataLanguageInfo(html);
 }
 
 function parseHTMLSolutions(html: string): Record<string, CompletedKata> {
@@ -100,7 +91,11 @@ function parseHTMLSolutions(html: string): Record<string, CompletedKata> {
       process.stdout.write(
         `${((current++ / total) * 100).toFixed(2)}%      \r`,
       );
-      kata.info[solution.language] = await getKataLanguageInfo(kata.slug, solution.language);
+      const { description, testCode, vote, voteID, csrfToken } = await getKataLanguageInfo(kata.slug, solution.language);
+      kata.info[solution.language] = { description, testCode }
+      kata.vote = vote;
+      if (voteID) kata.voteID = voteID;
+      kata.csrfToken = csrfToken
     }
   }
 

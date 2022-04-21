@@ -94,8 +94,12 @@ const fetchPage = async (page: number, cache: boolean) => {
 };
 
 (async () => {
+  if (!USER_NAME) return console.error('USER_NAME environment variable not set');
+  if (!USER_AGENT) return console.error('USER_AGENT environment variable not set');
+  if (!REMEMBER_USER_TOKEN) return console.error('REMEMBER_USER_TOKEN environment variable not set');
+
   const CACHE_PAGES = process.argv.includes('--cache-pages');
-  console.log('Downloading solutions...', CACHE_PAGES ? '(Using Cache)' : '');
+  console.log(`Downloading ${USER_NAME} solutions...`, CACHE_PAGES ? '(Using Cache)' : '');
 
   const katas = await fetchFirstPage(CACHE_PAGES);
 

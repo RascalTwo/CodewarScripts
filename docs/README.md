@@ -2,6 +2,15 @@
 
 Various scripts for saving data from your Codewars account.
 
+## Guides
+
+I just want to...
+
+- [Download my Solutions](./guide/download-solutions.md)
+- [Get my Solution Files](./guide/get-solution-files.md)
+- [Download clan stats](./guide/download-clan-stats.md)
+- [Generate my dated `git` repository](./guide/create-solutions-repo.md)
+
 ## Setup
 
 To get the scripts ready to run, execute:
@@ -21,7 +30,7 @@ REMEMBER_USER_TOKEN=Value of `remember_user_token` Cookie
 USER_NAME=Your Username
 ```
 
-> There exists a `.env.example` you can use as a template for your own `.env` file, which will read environment variables from automatically.
+> There exists a `.env.example` you can use as a template for your own `.env` file, which the program will read environment variables from automatically.
 
 ## Scripts
 
@@ -31,9 +40,16 @@ If you'd rather not manually obtain your `USER_NAME` and `REMEMBER_USER_TOKEN` v
 
 > npm run fetch-credentials
 
+This generates the output in this format:
+
+> REMEMBER_USER_TOKEN=hfbasoluihbfadsihbfaidsiajkbfidsayhufasdbihyfasdbfiuyhasdbfihuyadbfaidsuyvaiusbfiasduhfbasdiufbadsiuyfbasdiufsduaisuhiahbiuadbsaidbsfukhibisadubfisadbfisadfsdafsadjbfajksibfasdkijbsdalfhuvbadgsfhyavdsfhavbadvhbflahgbqwiyhufdsafsdfdassfadsfasdfdasfsdfasdfsadfasdfasdfasdfasdfrpqiuwyreieqwhjksabf
+> USER_NAME=YourUserName
+
+which you can then copy to your environment variables to allow other scripts to execute.
+
 ### Download Solutions
 
-Download all your solutions to `solutions_output` in various formats
+Download all your solutions to `solutions_output` in JSON format.
 
 ```shell
 npm run download-solutions
@@ -49,15 +65,7 @@ To ignore some solutions, you can copy the `datetime` from it's `<time-ago>` HTM
 <time-ago datetime="2000-01-01T05:00:00.000+0000" ...>XYZ ago</time-ago>
 ```
 
-and add these to the `IGNORE_SOLUTIONS` environment variable comma-seperated.
-
-### Download Clan Stats
-
-Download your clan stats as a new JSON to `clan_output`
-
-```shell
-npm run download-clan-stats
-```
+and add these to the `IGNORE_SOLUTIONS` environment variable comma-separated.
 
 ### Format Solutions
 
@@ -97,3 +105,11 @@ The `FORMATTER__DAILY_FILES__COMMIT_PER_KATA` environment variable determines if
     - The basic Kata information, relative markdown links to each solution file, and description from the first language the Fata was solved in.
 
 Creates a git repo with all commits properly dated to match the solution creation time.
+
+### Download Clan Stats
+
+Download your clan stats as a new JSON to `clan_output`
+
+```shell
+npm run download-clan-stats
+```

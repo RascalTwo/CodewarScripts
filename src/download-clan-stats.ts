@@ -43,6 +43,10 @@ async function getOwnInfo(): Promise<Entry> {
 }
 
 (async () => {
+  if (!USER_NAME) return console.error('USER_NAME environment variable not set');
+  if (!USER_AGENT) return console.error('USER_AGENT environment variable not set');
+  if (!REMEMBER_USER_TOKEN) return console.error('REMEMBER_USER_TOKEN environment variable not set');
+
   const response = await fetch(`https://www.codewars.com/users/${USER_NAME}/followers`, {
     headers: {
       'User-Agent': USER_AGENT,

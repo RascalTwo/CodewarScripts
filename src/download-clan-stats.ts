@@ -10,7 +10,7 @@ function parseHTMLUsernames(html: string): Record<string, Entry> {
     const entry = {
       rank: row.querySelector('span')!.textContent!.trim(),
       username: row.dataset.username!,
-      honor: +row.children.item(2)!.textContent!,
+      honor: +row.children.item(2)!.textContent!.replace(/,/g, ''),
       clan: row.children.item(1)!.textContent!.trim()
     };
     return {
@@ -43,7 +43,7 @@ async function getOwnInfo(): Promise<Entry> {
 }
 
 (async () => {
-  const response = await fetch(`https://www.codewars.com/users/${USER_NAME}/allies`, {
+  const response = await fetch(`https://www.codewars.com/users/${USER_NAME}/followers`, {
     headers: {
       'User-Agent': USER_AGENT,
       Cookie: 'remember_user_token=' + REMEMBER_USER_TOKEN,

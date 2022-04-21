@@ -114,7 +114,7 @@ export async function fetchKataLanguageInfo(slug: string, language: string) {
 		}).then((r: any) => r.text())
 }
 
-export function parseKataLanguageInfo(html: string){
+export function parseKataLanguageInfo(html: string, username: string) {
   const jsdom = new JSDOM(html);
   const testCode = jsdom.window.document.querySelector('#fixture_panel code')!.textContent!;
   const script = Array.from(jsdom.window.document.querySelectorAll('script')).find(script =>
@@ -128,9 +128,15 @@ export function parseKataLanguageInfo(html: string){
     vote: data.vote,
     voteID: script.textContent!.split('"challenge_vote":"')[1].split('"')[0].split('/').at(-1),
     csrfToken: jsdom.window.document.querySelector('[name="csrf-token"]')!.getAttribute('content')!,
-    upvotes: [...jsdom.window.document.querySelectorAll('.vote-label')!].map(
-      anchor => +anchor.childNodes[anchor.childNodes.length - 1].textContent!,
-    ) as [number,number],
+    upvotes: [...jsdom.window.document.querySelectorAll('#solutions_list > li')]
+      .filter(li => li.querySelector('.font-semibold')!.textContent === username)
+      .reduce(
+        (upvotes, li) =>
+          [...li.querySelectorAll('.vote-label')]
+            .map(({ childNodes }) => +childNodes[childNodes.length - 1].textContent!)
+            .map((count, i) => upvotes[i] + count) as [number, number],
+        [0, 0] as [number, number],
+      ),
   };
 }
 

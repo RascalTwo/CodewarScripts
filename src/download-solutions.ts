@@ -9,7 +9,7 @@ import { JSDOM } from 'jsdom';
 import formatKatas from './solution-formatters';
 import { fetchKataLanguageInfo, parseKataLanguageInfo } from './helpers';
 
-async function getKataLanguageInfo(slug: string, language: string, cache: boolean = true) {
+async function getKataLanguageInfo(slug: string, language: string, username: string, cache: boolean = true) {
   let html;
   const cachePath = path.join('cache', `${slug}-${language}.html`);
   if (!cache || !fs.existsSync(cachePath)) {
@@ -19,7 +19,7 @@ async function getKataLanguageInfo(slug: string, language: string, cache: boolea
     html = (await fs.promises.readFile(cachePath)).toString();
   }
 
-  return parseKataLanguageInfo(html);
+  return parseKataLanguageInfo(html, username);
 }
 
 function parseHTMLSolutions(html: string): Record<string, CompletedKata> {
@@ -126,6 +126,7 @@ const fetchPage = async (page: number, cache: boolean) => {
       const { description, testCode, upvotes, vote, voteID, csrfToken } = await getKataLanguageInfo(
         kata.slug,
         solution.language,
+        USER_NAME,
       );
       kata.info[solution.language] = { description, testCode };
       kata.vote = vote;

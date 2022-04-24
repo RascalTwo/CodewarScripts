@@ -8,6 +8,7 @@
     "format-solutions": "node dist/format-solutions.js",
     "download-clan-stats": "node dist/download-clan-stats.js",
     "fetch-credentials": "node dist/fetch-credentials.js",
+    "estimate-honor-and-score": "node dist/estimate-honor-and-score.js",
     "build": "tsc"
   },
   "author": "",

@@ -113,3 +113,13 @@ Download your clan stats as a new JSON to `clan_output`
 ```shell
 npm run download-clan-stats
 ```
+
+### Estimate Honor & Score
+
+Attempt to calculate using only publicly-available information, therefore requires no credentials.
+
+```shell
+npm run estimate-honor-and-score <Username> [When]
+```
+
+If time is not provided, then it estimates the users Honor & Score at the current time.

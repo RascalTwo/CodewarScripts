@@ -58,7 +58,7 @@ const fetchFirstPage = async (cache: boolean) => {
   const cachePath = path.join('cache', `page-${0}.html`);
 
   let html;
-  if (!fs.existsSync(cachePath)) {
+  if (!cache || !fs.existsSync(cachePath)) {
     html = await fetch(`https://www.codewars.com/users/${USER_NAME}/completed_solutions`, {
       headers: {
         'User-Agent': USER_AGENT,

@@ -106,7 +106,7 @@ interface CodewarsAPIError {
 }
 
 async function fetchKataInfo(id: string): Promise<FullKata | CodewarsAPIError> {
-  const cachePath = path.join('cache', `${id}.json`);
+  const cachePath = path.join('cache', `kata-${id}.json`);
   if (fs.existsSync(cachePath)) return JSON.parse((await fs.promises.readFile(cachePath)).toString());
   return fetch('https://www.codewars.com/api/v1/code-challenges/' + id)
     .then((response: any) => response.json())
@@ -115,19 +115,32 @@ async function fetchKataInfo(id: string): Promise<FullKata | CodewarsAPIError> {
     });
 }
 
-async function calculateHonorAndScoreAtTime(username: string, when: number = Date.now()) {
+async function getCompletedKatas(username: string, when: number = Date.now()): Promise<MinimalKata[]> {
+  const cachePath = path.join('cache', `completed-by-${username}.json`);
+  if (fs.existsSync(cachePath)) {
+    const { when: whenCached, completedKatas } = JSON.parse((await fs.promises.readFile(cachePath)).toString());
+    if (when <= whenCached) return completedKatas;
+  }
+
   const completedKatas: MinimalKata[] = [];
   let totalPages = 1;
   for (let page = 0; page < totalPages; page++) {
     const data = await fetch(
       `https://www.codewars.com/api/v1/users/${username}/code-challenges/completed?page=${page}`,
     ).then((response: any) => response.json());
-    if (data.success === false) return console.error(data.reason);
+    if (data.success === false) throw new Error(data.reason);
     totalPages = data.totalPages;
     completedKatas.push(
       ...data.data.map((kata: any) => ({ ...kata, completedAt: new Date(kata.completedAt).getTime() })),
     );
   }
+  return fs.promises
+    .writeFile(cachePath, JSON.stringify({ when, completedKatas }, null, '  '))
+    .then(() => completedKatas);
+}
+
+async function calculateHonorAndScoreAtTime(username: string, when: number = Date.now()) {
+  const completedKatas = await getCompletedKatas(username, when);
   console.log(`${completedKatas.length} completed katas found`);
   const consideringKatas = completedKatas.filter(kata => kata.completedAt <= when);
 

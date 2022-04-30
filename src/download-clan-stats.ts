@@ -4,6 +4,14 @@ import fetch from 'node-fetch';
 import { JSDOM } from 'jsdom';
 import { USER_NAME, USER_AGENT, REMEMBER_USER_TOKEN } from './constants';
 
+const flattenDate = (input: any) => {
+  const date = new Date(input);
+  date.setUTCHours(0);
+  date.setUTCMinutes(0);
+  date.setUTCSeconds(0);
+  date.setUTCMilliseconds(0);
+  return date;
+};
 
 function parseHTMLUsernames(html: string): Record<string, Entry> {
   return Array.from(new JSDOM(html).window.document.querySelectorAll('tr')).reduce((usernames, row) => {
@@ -42,7 +50,7 @@ async function getOwnInfo(): Promise<Entry> {
   };
 }
 
-(async () => {
+async function downloadClanStats() {
   if (!USER_NAME) return console.error('USER_NAME environment variable not set');
   if (!USER_AGENT) return console.error('USER_AGENT environment variable not set');
   if (!REMEMBER_USER_TOKEN) return console.error('REMEMBER_USER_TOKEN environment variable not set');
@@ -72,7 +80,7 @@ async function getOwnInfo(): Promise<Entry> {
   rows[USER_NAME] = await getOwnInfo();
 
   console.log();
-  return fs.promises.writeFile(
+  await fs.promises.writeFile(
     `clan_output/${Date.now()}.json`,
     JSON.stringify(
       Object.values(rows).sort((a, b) => b.honor - a.honor),
@@ -80,4 +88,47 @@ async function getOwnInfo(): Promise<Entry> {
       '  ',
     ),
   );
+}
+
+async function flattenClanStats() {
+  const times = (await fs.promises.readdir('clan_output'))
+    .filter(filename => filename.endsWith('.json'))
+    .sort()
+    .map(filename => +filename.split('.')[0]);
+
+  const end = flattenDate(times.at(-1)!);
+  end.setDate(end.getDate() + 2);
+
+  const collected: Record<string, any> = {};
+
+  let current = flattenDate(times[0]);
+  let last = 0;
+  while (current.getTime() !== end.getTime()) {
+    const currTime = current.getTime();
+
+    for (const time of times) {
+      if (time < last) continue;
+      if (time > currTime) break;
+
+      for (const user of JSON.parse((await fs.promises.readFile('clan_output/' + time + '.json')).toString())) {
+        collected[user.username] = user;
+      }
+      last = time;
+    }
+    await fs.promises.writeFile(
+      'clan_output/daily/' + currTime + '.json',
+      JSON.stringify(
+        Object.values(collected).sort((a, b) => b.honor - a.honor),
+        null,
+        '  ',
+      ),
+    );
+
+    current.setDate(current.getDate() + 1);
+  }
+}
+
+(async () => {
+  if (!process.argv.includes('--only-flatten')) await downloadClanStats();
+  await flattenClanStats();
 })().catch(console.error);

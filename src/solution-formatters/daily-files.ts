@@ -98,7 +98,7 @@ const dailyFiles: CompletedKataFormatter = async function dailyFiles(katas, dire
 
         if (FORMATTERS__DISABLE_GIT) continue;
 
-        const writeTime = new Date(sortedWithKatas.at(-1)!.solution.when).toISOString();
+        const writeTime = new Date(sortedWithKatas.slice(-1)[0]!.solution.when).toISOString();
         await setEnvironmentVariable('GIT_COMMITTER_DATE', writeTime, () =>
           git
             .add(filename)

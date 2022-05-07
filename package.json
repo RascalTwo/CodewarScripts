@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "engines": {
+    "node": ">=14.0.0"
+  },
   "scripts": {
     "download-solutions": "node dist/download-solutions.js",
     "format-solutions": "node dist/format-solutions.js",

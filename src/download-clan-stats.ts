@@ -45,7 +45,7 @@ async function getOwnInfo(): Promise<Entry> {
       .childNodes[1].textContent!.replace(/,/g, '')!,
     username: USER_NAME,
     clan: [...document.querySelector('.user-profile .stat-box > .stat:nth-of-type(2)')?.childNodes!]
-      .at(-1)
+      .slice(-1)[0]
       ?.textContent!.trim()!,
   };
 }
@@ -96,7 +96,7 @@ async function flattenClanStats() {
     .sort()
     .map(filename => +filename.split('.')[0]);
 
-  const end = flattenDate(times.at(-1)!);
+  const end = flattenDate(times.slice(-1)[0]!);
   end.setDate(end.getDate() + 2);
 
   const collected: Record<string, any> = {};

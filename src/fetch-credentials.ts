@@ -15,7 +15,7 @@ import { EMAIL, PASSWORD } from './constants';
   const { value: remember_user_token } = (await context.cookies()).find(
     cookie => cookie.name === 'remember_user_token',
   )!;
-  const username = (await page.locator('#header_profile_link').getAttribute('href'))!.split('/').at(-1);
+  const username = (await page.locator('#header_profile_link').getAttribute('href'))!.split('/').slice(-1)[0];
 
   await browser.close();
 

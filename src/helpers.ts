@@ -126,7 +126,7 @@ export function parseKataLanguageInfo(html: string, username: string) {
     testCode,
     description: data.description,
     vote: data.vote,
-    voteID: script.textContent!.split('"challenge_vote":"')[1].split('"')[0].split('/').at(-1),
+    voteID: script.textContent!.split('"challenge_vote":"')[1].split('"')[0].split('/').slice(-1)[0],
     csrfToken: jsdom.window.document.querySelector('[name="csrf-token"]')!.getAttribute('content')!,
     upvotes: [...jsdom.window.document.querySelectorAll('#solutions_list > li')]
       .filter(li => li.querySelector('.font-semibold')!.textContent === username)

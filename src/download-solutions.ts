@@ -29,7 +29,7 @@ function parseHTMLSolutions(html: string): Record<string, CompletedKata> {
       const anchor = rawSolutions.querySelector('a')!;
 
       return {
-        slug: anchor.href.split('/').at(-1)!,
+        slug: anchor.href.split('/').slice(-1)[0]!,
         title: anchor.textContent!,
         rank: anchor.parentNode?.children[0].textContent!,
         solutions: Array.from(rawSolutions.querySelectorAll('.markdown'))

@@ -2,6 +2,8 @@
 
 Various scripts for saving data from your Codewars account.
 
+> Exclusively Tested with Node v16
+
 ## Guides
 
 I just want to...

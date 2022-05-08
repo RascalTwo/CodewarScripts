@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import simpleGit from 'simple-git';
-import { FORMATTERS__DISABLE_GIT, FORMATTERS__SUFFIX_TEST_CODE } from '../constants';
+import { FORMATTERS__DISABLE_GIT, FORMATTERS__SEPARATE_FILE_PER_SOLUTION, FORMATTERS__SUFFIX_TEST_CODE } from '../constants';
 import { languageFilename, capitalize, getKataURL, setEnvironmentVariable, getLanguageName, formatLanguageTestCode } from '../helpers';
 
 import { CompletedKata, CompletedKataFormatter, Solution } from '../types';
@@ -31,7 +31,10 @@ const kataSlugDirectories: CompletedKataFormatter = async function kataSlugDirec
 
     const firstOfKata = !fs.existsSync(kataDir);
 
-    const languagePath = path.join(kataDir, languageFilename(solution.language));
+    const solutionIndex = FORMATTERS__SEPARATE_FILE_PER_SOLUTION ? kata.solutions.indexOf(solution) : 0
+    const filenameSuffix = solutionIndex ? solutionIndex.toString() : ''
+
+    const languagePath = path.join(kataDir, languageFilename(solution.language, filenameSuffix));
     const firstOfLanguage = !fs.existsSync(languagePath);
     if (firstOfKata) await fs.promises.mkdir(kataDir);
     await fs.promises.writeFile(
@@ -40,7 +43,7 @@ const kataSlugDirectories: CompletedKataFormatter = async function kataSlugDirec
     );
 
     const readmePath = path.join(kataDir, 'README.md');
-    const languageMarkdownLink = `[${capitalize(solution.language)}](./${languageFilename(solution.language)})`;
+    const languageMarkdownLink = `[${capitalize(solution.language)}](./${languageFilename(solution.language, filenameSuffix)})`;
     if (firstOfKata) {
       await fs.promises.writeFile(
         readmePath,

@@ -85,6 +85,8 @@ If the formatters are running too slow, or you wish to not create git repositori
 
 When applicable, formatters will append the test code from the Kata to the solution code; this can be disabled by clearing the `FORMATTERS__SUFFIX_TEST_CODE` environment variable.
 
+Another configurable is the `FORMATTERS__SEPARATE_FILE_PER_SOLUTION` environment variable, which for applicable formatters, creates a separate file for each different solution of the same language, instead of overriding the first solutions with the latest one.
+
 ##### `json`
 
 A epoch-names JSON file with the raw solution data.

@@ -146,8 +146,8 @@ export function parseKataLanguageInfo(html: string, username: string) {
   };
 }
 
-export const languageFilename = (language: string) =>
-  `${language}.${getLanguageExtension(language)}`;
+export const languageFilename = (language: string, suffix: string = '') =>
+  `${language}${suffix}.${getLanguageExtension(language)}`;
 
 export const capitalize = (string: string) => string[0].toUpperCase() + string.slice(1);
 

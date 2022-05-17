@@ -5,6 +5,7 @@ import {
   getKataURL,
   getLanguageExtension,
   getLanguageName,
+  getLastNArgument,
   setEnvironmentVariable,
 } from '../helpers';
 import { FORMATTERS__DISABLE_GIT, FORMATTER__DAILY_FILES__COMMIT_PER_KATA } from '../constants';
@@ -55,7 +56,7 @@ const dailyFiles: CompletedKataFormatter = async function dailyFiles(katas, dire
 
   for (const [date, solutions] of Object.entries(dates).sort((a, b) => a[0].localeCompare(b[0]))) {
     if (FORMATTER__DAILY_FILES__COMMIT_PER_KATA) {
-      for (const { solution, kata } of sortAndAddKatas(solutions)) {
+      for (const { solution, kata } of sortAndAddKatas(solutions).slice(getLastNArgument())) {
         process.stdout.write(`${((done++ / total) * 100).toFixed(2)}%       \r`);
         const { filename, filepath } = getFilenameAndPath(date, solution.language);
         const lines = getSolutionLines(solution, kata);
@@ -88,7 +89,7 @@ const dailyFiles: CompletedKataFormatter = async function dailyFiles(katas, dire
         const { filename, filepath } = getFilenameAndPath(date, language);
 
         let solutionLines = [];
-        const sortedWithKatas = sortAndAddKatas(solutions);
+        const sortedWithKatas = sortAndAddKatas(solutions).slice(getLastNArgument());
         for (const { solution, kata } of sortedWithKatas) {
           process.stdout.write(`${((done++ / total) * 100).toFixed(2)}%       \r`);
 

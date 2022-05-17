@@ -36,6 +36,8 @@ USER_NAME=Your Username
 
 ## Scripts
 
+The argument `--last-n-solutions=X` can be used to only process the last N solutions.
+
 ### Fetch Credentials
 
 If you'd rather not manually obtain your `USER_NAME` and `REMEMBER_USER_TOKEN` values, you can instead set the `EMAIL` and `PASSWORD` environment variables to have these fetched for you.

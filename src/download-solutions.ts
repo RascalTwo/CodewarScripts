@@ -7,7 +7,7 @@ import { USER_NAME, USER_AGENT, REMEMBER_USER_TOKEN, IGNORE_SOLUTIONS } from './
 import type { CompletedKata } from './types';
 import { JSDOM } from 'jsdom';
 import formatKatas from './solution-formatters';
-import { fetchKataLanguageInfo, parseKataLanguageInfo } from './helpers';
+import { fetchKataLanguageInfo, getLastNArgument, parseKataLanguageInfo } from './helpers';
 
 async function getKataLanguageInfo(slug: string, language: string, username: string, cache: boolean = true) {
   let html;
@@ -103,13 +103,16 @@ const fetchPage = async (page: number, cache: boolean) => {
 
   const katas = await fetchFirstPage(CACHE_PAGES);
 
+  let katasToDownload = getLastNArgument();
+  if (katasToDownload !== undefined) katasToDownload = -katasToDownload;
+
   let page = 1;
   while (true) {
     process.stdout.write(`Page #${page.toString().padStart(2, '0')} \r`);
     const newRows = await fetchPage(page++, CACHE_PAGES);
     Object.assign(katas, newRows);
     const length = Object.keys(newRows).length;
-    if (!length) break;
+    if (!length || katasToDownload && (Object.keys(katas).length >= katasToDownload)) break;
   }
 
   console.log('Downloading Katas...');

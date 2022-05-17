@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import simpleGit from 'simple-git';
 import { FORMATTERS__DISABLE_GIT, FORMATTERS__SEPARATE_FILE_PER_SOLUTION, FORMATTERS__SUFFIX_TEST_CODE } from '../constants';
-import { languageFilename, capitalize, getKataURL, setEnvironmentVariable, getLanguageName, formatLanguageTestCode } from '../helpers';
+import { languageFilename, capitalize, getKataURL, setEnvironmentVariable, getLanguageName, formatLanguageTestCode, getLastNArgument } from '../helpers';
 
 import { CompletedKata, CompletedKataFormatter, Solution } from '../types';
 
@@ -23,7 +23,7 @@ const kataSlugDirectories: CompletedKataFormatter = async function kataSlugDirec
     }
   }
 
-  for (const solution of solutions.sort((a, b) => a.when - b.when)) {
+  for (const solution of solutions.sort((a, b) => a.when - b.when).slice(getLastNArgument())) {
     process.stdout.write(`${((done++ / total) * 100).toFixed(2)}%       \r`);
 
     const kata = solutionKatas.get(solution.when)!;

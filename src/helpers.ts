@@ -146,6 +146,8 @@ export function parseKataLanguageInfo(html: string, username: string) {
   };
 }
 
+export const getLastNArgument = () => -(process.argv.find(arg => arg.startsWith('--last-n-solutions=')) || '=').split('=')[1] || undefined
+
 export const languageFilename = (language: string, suffix: string = '') =>
   `${language}${suffix}.${getLanguageExtension(language)}`;
 

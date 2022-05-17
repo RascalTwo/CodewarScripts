@@ -129,3 +129,13 @@ npm run estimate-honor-and-score <Username> [When]
 ```
 
 If time is not provided, then it estimates the users Honor & Score at the current time.
+
+### List Unrated Katas
+
+As rating a kata gains you an honor per kata, knowing which katas you have not rated is useful information to know.
+
+```shell
+npm run list-unrated-kata
+```
+
+This will traverse all your downloaded solutions, outputting the ones that have not been rated.

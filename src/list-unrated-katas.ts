@@ -2,13 +2,7 @@ import path from 'path';
 import fs from 'fs';
 import { fetchKataLanguageInfo, parseKataLanguageInfo } from './helpers';
 import type { CompletedKata } from './types';
-import { REMEMBER_USER_TOKEN, USER_NAME } from './constants';
-
-async function setKataVote(kata: CompletedKata, vote: -1 | 0 | 1 | null, username: string) {
-  const { csrfToken, voteID } = parseKataLanguageInfo(
-    await fetchKataLanguageInfo(kata.slug, kata.solutions[0].language), username
-  );
-}
+import { USER_NAME } from './constants';
 
 (async () => {
   const jsonOutputDirectory = path.join('solutions_output', 'json');
@@ -22,10 +16,12 @@ async function setKataVote(kata: CompletedKata, vote: -1 | 0 | 1 | null, usernam
   );
 
   for (const kata of katas) {
-    if (kata.vote === null) {
-      const html = await fetchKataLanguageInfo(kata.slug, kata.solutions[0].language);
-      const info = parseKataLanguageInfo(html, USER_NAME);
-      if (info.vote === null) console.log('https://www.codewars.com/kata/' + kata.slug);
-    }
+    if (kata.vote) continue;
+
+    const info = parseKataLanguageInfo(await fetchKataLanguageInfo(kata.slug, kata.solutions[0].language), USER_NAME);
+    if (info.vote !== null) continue;
+
+    console.log('\t' + kata.title);
+    console.log('https://www.codewars.com/kata/' + kata.slug);
   }
 })().catch(console.error);

@@ -12,6 +12,8 @@
     "download-clan-stats": "node dist/download-clan-stats.js",
     "fetch-credentials": "node dist/fetch-credentials.js",
     "estimate-honor-and-score": "node dist/estimate-honor-and-score.js",
+    "list-unrated-katas": "node dist/list-unrated-katas.js",
+    "rate-katas": "node dist/rate-katas.js",
     "build": "tsc"
   },
   "author": "",

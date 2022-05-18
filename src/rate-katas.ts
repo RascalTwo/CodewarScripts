@@ -27,6 +27,8 @@ import { chromium } from 'playwright';
     )
       unratedKatas.push(kata);
 
+  if (!unratedKatas.length) return console.log('No unrated katas found');
+
   const browser = await chromium.launch({ headless: false });
   const context = await browser.newContext();
   const page = await context.newPage();

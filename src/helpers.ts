@@ -113,11 +113,17 @@ export const generateCommentLine = (language: string, content: string) => {
 
 export async function fetchKataLanguageInfo(slug: string, language: string) {
   return await fetch(`https://www.codewars.com/kata/${slug}/solutions/${language}/me`, {
-			headers: {
-				'User-Agent': USER_AGENT,
-				Cookie: 'remember_user_token=' + REMEMBER_USER_TOKEN,
-			},
-		}).then((r: any) => r.text())
+    headers: {
+      'User-Agent': USER_AGENT,
+      Cookie: 'remember_user_token=' + REMEMBER_USER_TOKEN,
+    },
+  })
+    .then((r: any) => r.text())
+    .then((html: string) =>
+      html === 'Retry later'
+        ? new Promise(resolve => setTimeout(resolve, 10000)).then(() => fetchKataLanguageInfo(slug, language))
+        : html,
+    );
 }
 
 export function parseKataLanguageInfo(html: string, username: string) {

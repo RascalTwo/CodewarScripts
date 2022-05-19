@@ -7,20 +7,7 @@ import { USER_NAME, USER_AGENT, REMEMBER_USER_TOKEN, IGNORE_SOLUTIONS } from './
 import type { CompletedKata } from './types';
 import { JSDOM } from 'jsdom';
 import formatKatas from './solution-formatters';
-import { fetchKataLanguageInfo, getLastNArgument, parseKataLanguageInfo } from './helpers';
-
-async function getKataLanguageInfo(slug: string, language: string, username: string, cache: boolean = true) {
-  let html;
-  const cachePath = path.join('cache', `${slug}-${language}.html`);
-  if (!cache || !fs.existsSync(cachePath)) {
-    html = await fetchKataLanguageInfo(slug, language);
-    await fs.promises.writeFile(cachePath, html);
-  } else {
-    html = (await fs.promises.readFile(cachePath)).toString();
-  }
-
-  return parseKataLanguageInfo(html, username);
-}
+import { fetchKataLanguageInfo, getKataLanguageInfo, getLastNArgument, parseKataLanguageInfo } from './helpers';
 
 function parseHTMLSolutions(html: string): Record<string, CompletedKata> {
   const { document } = new JSDOM(html).window;

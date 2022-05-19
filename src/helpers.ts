@@ -1,3 +1,5 @@
+import fs from 'fs';
+import path from 'path';
 import { JSDOM } from 'jsdom';
 import { USER_AGENT, REMEMBER_USER_TOKEN } from './constants';
 import { CompletedKata, CompletedKataFormatter, Solution } from './types';
@@ -110,6 +112,18 @@ export const generateCommentLine = (language: string, content: string) => {
   }
 };
 
+export async function getKataLanguageInfo(slug: string, language: string, username: string, cache: boolean = true) {
+  let html;
+  const cachePath = path.join('cache', `${slug}-${language}.html`);
+  if (!cache || !fs.existsSync(cachePath)) {
+    html = await fetchKataLanguageInfo(slug, language);
+    await fs.promises.writeFile(cachePath, html);
+  } else {
+    html = (await fs.promises.readFile(cachePath)).toString();
+  }
+
+  return parseKataLanguageInfo(html, username);
+}
 
 export async function fetchKataLanguageInfo(slug: string, language: string) {
   return await fetch(`https://www.codewars.com/kata/${slug}/solutions/${language}/me`, {

@@ -1,10 +1,10 @@
 import path from 'path';
 import fs from 'fs';
-import { fetchKataLanguageInfo, getKataURL, parseKataLanguageInfo } from './helpers';
+import { fetchKataLanguageInfo, getKataLanguageInfo, getKataURL, parseKataLanguageInfo } from './helpers';
 import type { CompletedKata } from './types';
 import { EMAIL, PASSWORD, USER_NAME } from './constants';
 import { chromium } from 'playwright';
-
+import formatKatas from './solution-formatters';
 
 (async () => {
   if (!EMAIL || !PASSWORD) return console.log('EMAIL & PASSWORD environment variables are required');
@@ -19,14 +19,7 @@ import { chromium } from 'playwright';
     (await fs.promises.readFile(path.join(jsonOutputDirectory, filenames[0]))).toString(),
   );
 
-  const unratedKatas = [];
-  for (const kata of katas)
-    if (
-      kata.vote === null &&
-      parseKataLanguageInfo(await fetchKataLanguageInfo(kata.slug, kata.solutions[0].language), USER_NAME).vote === null
-    )
-      unratedKatas.push(kata);
-
+  const unratedKatas = katas.filter(({ vote }) => vote === null);
   if (!unratedKatas.length) return console.log('No unrated katas found');
 
   const browser = await chromium.launch({ headless: false });
@@ -39,8 +32,9 @@ import { chromium } from 'playwright';
 
   for (const kata of unratedKatas) {
     console.log('\t' + kata.title);
-    console.log(getKataURL(kata));
-    await page.goto(getKataURL(kata));
+    const url = getKataURL(kata) + '/solutions/' + kata.solutions[0].language
+    console.log(url);
+    await page.goto(url);
 
     await page.locator('#solutions').click();
 
@@ -48,4 +42,14 @@ import { chromium } from 'playwright';
   }
 
   await browser.close();
+
+  for (const kata of unratedKatas) {
+    kata.vote = (await getKataLanguageInfo(kata.slug, kata.solutions[0].language, USER_NAME, false)).vote;
+  }
+
+  process.argv.unshift('--formatters=json');
+  return formatKatas(
+    katas.reduce((map, kata) => ({ ...map, [kata.slug]: kata }), {}),
+    './solutions_output',
+  );
 })().catch(console.error);

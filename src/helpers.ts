@@ -142,7 +142,7 @@ export async function fetchKataLanguageInfo(slug: string, language: string) {
 
 export function parseKataLanguageInfo(html: string, username: string) {
   const jsdom = new JSDOM(html);
-  const testCode = jsdom.window.document.querySelector('#fixture_panel code')!.textContent!;
+  const testCode = jsdom.window.document.querySelector('pre code')!.textContent!;
   const script = Array.from(jsdom.window.document.querySelectorAll('script')).find(script =>
     script.textContent?.includes('data: JSON.parse('),
   )!;

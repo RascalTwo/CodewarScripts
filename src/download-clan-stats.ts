@@ -65,6 +65,7 @@ async function downloadClanStats() {
 
   let page = 1;
   while (true) {
+    await new Promise(resolve => setTimeout(resolve, 1000));
     process.stdout.write(`Page #${page.toString().padStart(2, '0')} \r`);
     const response = await fetch(`https://www.codewars.com/users/${USER_NAME}/allies?page=${page++}`, {
       headers: {

@@ -33,6 +33,8 @@ export function getLanguageExtension(language: string) {
       return 'cs';
     case 'cpp':
       return 'cpp'
+    case 'kotlin':
+      return 'tkt'
     case 'c':
       return 'c'
     case 'lua':
@@ -64,6 +66,8 @@ export const getLanguageName = (language: string) => {
       return 'C#'
     case 'cpp':
       return 'C++'
+    case 'kotlin':
+      return 'Kotlin'
     case 'c':
       return 'C'
     case 'lua':
@@ -94,6 +98,8 @@ export const generateCommentLine = (language: string, content: string) => {
     case 'csharp':
       return '//\t' + content;
     case 'cpp':
+      return '//\t' + content
+    case 'kotlin':
       return '//\t' + content
     case 'c':
       return '//\t' + content

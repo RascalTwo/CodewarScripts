@@ -138,10 +138,10 @@ export async function fetchKataLanguageInfo(slug: string, language: string) {
       Cookie: 'remember_user_token=' + REMEMBER_USER_TOKEN,
     },
   })
-    .then((r: any) => r.text())
+    .then((r: any) => r.status === 429 ? 'Retry later' : r.text())
     .then((html: string) =>
       html === 'Retry later'
-        ? new Promise(resolve => setTimeout(resolve, 10000)).then(() => fetchKataLanguageInfo(slug, language))
+        ? delay(10000).then(() => fetchKataLanguageInfo(slug, language))
         : html,
     );
 }
@@ -186,4 +186,53 @@ export const setEnvironmentVariable = async (key: string, value: string, callbac
   process.env[key] = value;
   await callback();
   process.env[key] = previousValue;
+}
+
+export const delay = (ms: number) => new Promise(r => setTimeout(r, ms))
+
+const RANK_STYLES = [
+  {
+    rank: -8,
+    name: '8 kyu',
+    color: 'white',
+  },
+  {
+    name: '7 kyu',
+    color: 'white',
+    rank: -7,
+  },
+  {
+    rank: -6,
+    name: '6 kyu',
+    color: 'yellow',
+  },
+  {
+    rank: -5,
+    name: '5 kyu',
+    color: 'yellow',
+  },
+  {
+    rank: -4,
+    name: '4 kyu',
+    color: 'blue',
+  },
+  {
+    rank: -3,
+    name: '3 kyu',
+    color: 'blue',
+  },
+  {
+    rank: -2,
+    name: '2 kyu',
+    color: 'purple',
+  },
+  {
+    rank: -1,
+    name: '1 kyu',
+    color: 'purple',
+  },
+];
+
+export const numericRankToName = (number: number) => {
+  return RANK_STYLES.find(rank => rank.rank === number)!.name;
 }

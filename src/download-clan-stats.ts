@@ -2,7 +2,8 @@ import fs from 'fs';
 // @ts-ignore
 import fetch from 'node-fetch';
 import { JSDOM } from 'jsdom';
-import { USER_NAME, USER_AGENT, REMEMBER_USER_TOKEN } from './constants';
+import { USER_NAME, USER_AGENT, REMEMBER_USER_TOKEN, CLAN } from './constants';
+import { delay, numericRankToName } from './helpers';
 
 const flattenDate = (input: any) => {
   const date = new Date(input);
@@ -50,7 +51,48 @@ async function getOwnInfo(): Promise<Entry> {
   };
 }
 
-async function downloadClanStats() {
+async function useAPI(){
+  console.log('Attempting to download Clan stats using the API...');
+  if (!CLAN) return console.error('CLAN environment variable not set');
+
+  const rows: Record<string, Entry> = {}
+
+  let totalPages = 1;
+  for (let page = 0; page <= totalPages; page++){
+    await delay(2500);
+    process.stdout.write(`Page #${page.toString().padStart(2, '0')} \r`);
+    const response = await fetch(`https://www.codewars.com/api/v1/clans/${encodeURIComponent(CLAN)}/members?page=${page}`);
+    const payload: { success: false, reason: string } | {
+      totalPages: number,
+      totalItems: number,
+      data: {
+        id: string,
+        username: string,
+        honor: number,
+        rank: number,
+      }[],
+    } = await response.json();
+    if ('success' in payload){
+      console.error('API Error:', payload.reason);
+      page--;
+      await delay(10000);
+      continue
+    }
+    totalPages = payload.totalPages
+    for (const { username, honor, rank } of payload.data){
+      rows[username] = {
+        username, honor,
+        clan: CLAN,
+        rank: numericRankToName(rank)
+      }
+    }
+  }
+
+  return true;
+}
+
+async function useBrowser() {
+  console.log('Attempting to download Clan stats using browser...');
   if (!USER_NAME) return console.error('USER_NAME environment variable not set');
   if (!USER_AGENT) return console.error('USER_AGENT environment variable not set');
   if (!REMEMBER_USER_TOKEN) return console.error('REMEMBER_USER_TOKEN environment variable not set');
@@ -65,7 +107,7 @@ async function downloadClanStats() {
 
   let page = 1;
   while (true) {
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await delay(2500);
     process.stdout.write(`Page #${page.toString().padStart(2, '0')} \r`);
     const response = await fetch(`https://www.codewars.com/users/${USER_NAME}/allies?page=${page++}`, {
       headers: {
@@ -89,6 +131,8 @@ async function downloadClanStats() {
       '  ',
     ),
   );
+
+  return true;
 }
 
 async function flattenClanStats() {
@@ -130,6 +174,11 @@ async function flattenClanStats() {
 }
 
 (async () => {
-  if (!process.argv.includes('--only-flatten')) await downloadClanStats();
+  if (!process.argv.includes('--only-flatten')) {
+    const useDirective = process.argv.find(arg => arg.startsWith('--use'))
+
+    const chosen = useDirective && useDirective.endsWith('api') ? useAPI : useBrowser;
+    if (!(await chosen())) await (chosen === useAPI ? useBrowser : useAPI)();
+  }
   await flattenClanStats();
 })().catch(console.error);

@@ -120,6 +120,16 @@ Download your clan stats as a new JSON to `clan_output`
 npm run download-clan-stats
 ```
 
+If you wish to only flatten your downloaded clan stats into a single once-a-day JSON file, you can use the `--only-flatten` argument.
+
+***
+
+#### API
+
+An API for this information was [recently added](https://github.com/codewars/codewars.com/discussions/2710), containing the same information but with 100 users listed per page - a great improvement over the current 15.
+
+Unfortunately as of writing, I haven't been able to use it for half of the pages, therefore it's only usable via the `--use-api` argument, when it becomes stable I will make it default.
+
 ### Estimate Honor & Score
 
 Attempt to calculate using only publicly-available information, therefore requires no credentials.

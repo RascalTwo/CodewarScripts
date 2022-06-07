@@ -57,6 +57,7 @@ async function useAPI(){
 
   const rows: Record<string, Entry> = {}
 
+  let failures: Record<number, number> = {}
   let totalPages = 1;
   for (let page = 0; page <= totalPages; page++){
     await delay(2500);
@@ -74,6 +75,14 @@ async function useAPI(){
     } = await response.json();
     if ('success' in payload){
       console.error('API Error:', payload.reason);
+
+      if (!(page in failures)) failures[page] = 0;
+      failures[page]++;
+      if (failures[page] > 5){
+        console.error('Failed on this page five times, giving up');
+        return false;
+      }
+
       page--;
       await delay(10000);
       continue
@@ -91,8 +100,8 @@ async function useAPI(){
   return true;
 }
 
-async function useBrowser() {
-  console.log('Attempting to download Clan stats using browser...');
+async function useAllies() {
+  console.log('Attempting to download Clan stats using allies page...');
   if (!USER_NAME) return console.error('USER_NAME environment variable not set');
   if (!USER_AGENT) return console.error('USER_AGENT environment variable not set');
   if (!REMEMBER_USER_TOKEN) return console.error('REMEMBER_USER_TOKEN environment variable not set');
@@ -177,8 +186,8 @@ async function flattenClanStats() {
   if (!process.argv.includes('--only-flatten')) {
     const useDirective = process.argv.find(arg => arg.startsWith('--use'))
 
-    const chosen = useDirective && useDirective.endsWith('api') ? useAPI : useBrowser;
-    if (!(await chosen())) await (chosen === useAPI ? useBrowser : useAPI)();
+    const chosen = useDirective && useDirective.endsWith('allies') ? useAllies : useAPI;
+    if (!(await chosen())) await (chosen === useAPI ? useAllies : useAPI)();
   }
   await flattenClanStats();
 })().catch(console.error);

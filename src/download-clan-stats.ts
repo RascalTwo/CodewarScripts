@@ -97,6 +97,16 @@ async function useAPI(){
     }
   }
 
+  console.log();
+  await fs.promises.writeFile(
+    `clan_output/${Date.now()}.json`,
+    JSON.stringify(
+      Object.values(rows).sort((a, b) => b.honor - a.honor),
+      undefined,
+      '  ',
+    ),
+  );
+
   return true;
 }
 

@@ -1,6 +1,7 @@
 export interface KataLanguageInfo {
   description: string;
   testCode: string
+  linkedSolutions: Record<'code' | 'link', string>[]
 }
 
 export type KataVote = -1 | 0 | 1 | null;

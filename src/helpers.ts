@@ -160,6 +160,11 @@ export function parseKataLanguageInfo(html: string, username: string) {
     vote: data.vote,
     voteID: script.textContent!.split('"challenge_vote":"')[1].split('"')[0].split('/').slice(-1)[0],
     csrfToken: jsdom.window.document.querySelector('[name="csrf-token"]')!.getAttribute('content')!,
+    linkedSolutions: [...jsdom.window.document.querySelectorAll('#solutions_list > li')]
+      .map(li => ({
+        code: li.querySelector('code')!.textContent!,
+        link: [...li.querySelectorAll('a')].find(a => a.href.includes('/kata/reviews/'))!.href
+      })),
     upvotes: [...jsdom.window.document.querySelectorAll('#solutions_list > li')]
       .filter(li => li.querySelector('.font-semibold')!.textContent === username)
       .reduce(

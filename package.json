@@ -2,8 +2,9 @@
   "name": "codewar-scripts",
   "version": "1.0.0",
   "description": "Various scripts for saving data from your Codewars account",
-  "main": " dist/index.js",
-  "source": "src/index.ts",
+  "main": "./dist/index.js",
+  "source": "./src/index.ts",
+  "types": "./dist/index.d.ts",
   "engines": {
     "node": ">=14.0.0"
   },
@@ -24,12 +25,12 @@
     "jsdom": "^19.0.0",
     "node-fetch": "^2.6.7",
     "simple-git": "^3.4.0",
-    "ts-node": "^10.4.0",
-    "typescript": "^4.5.5"
-  },
-  "devDependencies": {
+    "typescript": "^4.5.5",
     "@types/jsdom": "^16.2.14",
     "@types/node-fetch": "^3.0.3"
+  },
+  "devDependencies": {
+    "ts-node": "^10.8.1"
   },
   "optionalDependencies": {
     "playwright": "^1.18.1"

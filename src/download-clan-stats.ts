@@ -36,24 +36,23 @@ interface Entry {
   clan: string;
 }
 
-async function getOwnInfo(): Promise<Entry> {
-  const response = await fetch(`https://www.codewars.com/users/${USER_NAME}/stats`);
+async function getOwnInfo(userName: string): Promise<Entry> {
+  const response = await fetch(`https://www.codewars.com/users/${userName}/stats`);
   const document = new JSDOM(await response.text()).window.document;
   return {
     rank: document.querySelector('.stat-container .stat')!.childNodes[1].textContent!,
     honor: +document
       .querySelector('.stat-container .stat:nth-of-type(2)')!
       .childNodes[1].textContent!.replace(/,/g, '')!,
-    username: USER_NAME,
+    username: userName,
     clan: [...document.querySelector('.user-profile .stat-box > .stat:nth-of-type(2)')?.childNodes!]
       .slice(-1)[0]
       ?.textContent!.trim()!,
   };
 }
 
-export async function useAPI(){
+export async function useAPI(clan: string) {
   console.log('Attempting to download Clan stats using the API...');
-  if (!CLAN) return console.error('CLAN environment variable not set');
 
   const rows: Record<string, Entry> = {}
 
@@ -62,7 +61,7 @@ export async function useAPI(){
   for (let page = 0; page <= totalPages; page++){
     await delay(2500);
     process.stdout.write(`Page #${page.toString().padStart(2, '0')} \r`);
-    const response = await fetch(`https://www.codewars.com/api/v1/clans/${encodeURIComponent(CLAN)}/members?page=${page}`);
+    const response = await fetch(`https://www.codewars.com/api/v1/clans/${encodeURIComponent(clan)}/members?page=${page}`);
     const payload: { success: false, reason: string } | {
       totalPages: number,
       totalItems: number,
@@ -80,46 +79,35 @@ export async function useAPI(){
       failures[page]++;
       if (failures[page] > 5){
         console.error('Failed on this page five times, giving up');
-        return false;
+        return;
       }
 
       page--;
       await delay(10000);
       continue
     }
-    totalPages = payload.totalPages
-    for (const { username, honor, rank } of payload.data){
+    totalPages = payload.totalPages;
+    for (const { username, honor, rank } of payload.data) {
       rows[username] = {
         username, honor,
-        clan: CLAN,
-        rank: numericRankToName(rank)
-      }
+        clan,
+        rank: numericRankToName(rank),
+      };
     }
   }
 
   console.log();
-  await fs.promises.writeFile(
-    `clan_output/${Date.now()}.json`,
-    JSON.stringify(
-      Object.values(rows).sort((a, b) => b.honor - a.honor),
-      undefined,
-      '  ',
-    ),
-  );
 
-  return true;
+  return rows;
 }
 
-export async function useAllies() {
+export async function useAllies(userName: string, userAgent: string, rememberUserToken: string) {
   console.log('Attempting to download Clan stats using allies page...');
-  if (!USER_NAME) return console.error('USER_NAME environment variable not set');
-  if (!USER_AGENT) return console.error('USER_AGENT environment variable not set');
-  if (!REMEMBER_USER_TOKEN) return console.error('REMEMBER_USER_TOKEN environment variable not set');
 
-  const response = await fetch(`https://www.codewars.com/users/${USER_NAME}/followers`, {
+  const response = await fetch(`https://www.codewars.com/users/${userName}/followers`, {
     headers: {
-      'User-Agent': USER_AGENT,
-      Cookie: 'remember_user_token=' + REMEMBER_USER_TOKEN,
+      'User-Agent': userAgent,
+      Cookie: 'remember_user_token=' + rememberUserToken,
     },
   });
   const rows = parseHTMLUsernames(await response.text());
@@ -128,7 +116,7 @@ export async function useAllies() {
   while (true) {
     await delay(2500);
     process.stdout.write(`Page #${page.toString().padStart(2, '0')} \r`);
-    const response = await fetch(`https://www.codewars.com/users/${USER_NAME}/allies?page=${page++}`, {
+    const response = await fetch(`https://www.codewars.com/users/${userName}/allies?page=${page++}`, {
       headers: {
         'x-requested-with': 'XMLHttpRequest',
       },
@@ -139,19 +127,11 @@ export async function useAllies() {
     if (!length || length !== 15) break;
   }
 
-  rows[USER_NAME] = await getOwnInfo();
+  rows[userName] = await getOwnInfo(userName);
 
   console.log();
-  await fs.promises.writeFile(
-    `clan_output/${Date.now()}.json`,
-    JSON.stringify(
-      Object.values(rows).sort((a, b) => b.honor - a.honor),
-      undefined,
-      '  ',
-    ),
-  );
 
-  return true;
+  return rows;
 }
 
 export async function flattenClanStats() {
@@ -196,8 +176,31 @@ if (require.main === module) (async () => {
   if (!process.argv.includes('--only-flatten')) {
     const useDirective = process.argv.find(arg => arg.startsWith('--use'))
 
-    const chosen = useDirective && useDirective.endsWith('allies') ? useAllies : useAPI;
-    if (!(await chosen())) await (chosen === useAPI ? useAllies : useAPI)();
+    const first = useDirective && useDirective.endsWith('allies') ? useAllies : useAPI;
+    const executing = [first, first === useAPI ? useAllies : useAPI];
+    for (const func of executing) {
+      let data;
+      if (func === useAPI) {
+        if (!CLAN) console.error('CLAN environment variable not set');
+        else data = await useAPI(CLAN);
+      } else if (func === useAllies) {
+        if (!USER_NAME) console.error('USER_NAME environment variable not set');
+        else if (!USER_AGENT) console.error('USER_AGENT environment variable not set');
+        else if (!REMEMBER_USER_TOKEN) console.error('REMEMBER_USER_TOKEN environment variable not set');
+        else data = await useAllies(USER_NAME, USER_AGENT, REMEMBER_USER_TOKEN);
+      }
+
+      if (!data) continue;
+      await fs.promises.writeFile(
+        'clan_output/daily/' + Date.now() + '.json',
+        JSON.stringify(
+          Object.values(data).sort((a, b) => b.honor - a.honor),
+          null,
+          '  ',
+        ),
+      );
+      break;
+    }
   }
   await flattenClanStats();
 })().catch(console.error);

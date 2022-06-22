@@ -1,8 +1,9 @@
 {
-  "name": "codewars-tracker",
+  "name": "codewar-scripts",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Various scripts for saving data from your Codewars account",
+  "main": " dist/index.js",
+  "source": "src/index.ts",
   "engines": {
     "node": ">=14.0.0"
   },

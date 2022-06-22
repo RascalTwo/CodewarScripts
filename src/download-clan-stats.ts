@@ -51,7 +51,7 @@ async function getOwnInfo(): Promise<Entry> {
   };
 }
 
-async function useAPI(){
+export async function useAPI(){
   console.log('Attempting to download Clan stats using the API...');
   if (!CLAN) return console.error('CLAN environment variable not set');
 
@@ -110,7 +110,7 @@ async function useAPI(){
   return true;
 }
 
-async function useAllies() {
+export async function useAllies() {
   console.log('Attempting to download Clan stats using allies page...');
   if (!USER_NAME) return console.error('USER_NAME environment variable not set');
   if (!USER_AGENT) return console.error('USER_AGENT environment variable not set');
@@ -154,7 +154,7 @@ async function useAllies() {
   return true;
 }
 
-async function flattenClanStats() {
+export async function flattenClanStats() {
   const times = (await fs.promises.readdir('clan_output'))
     .filter(filename => filename.endsWith('.json'))
     .sort()
@@ -192,7 +192,7 @@ async function flattenClanStats() {
   }
 }
 
-(async () => {
+if (require.main === module) (async () => {
   if (!process.argv.includes('--only-flatten')) {
     const useDirective = process.argv.find(arg => arg.startsWith('--use'))
 

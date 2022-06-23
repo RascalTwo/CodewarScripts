@@ -192,15 +192,16 @@ if (require.main === module) (async () => {
       }
 
       if (!data) continue;
+      const now = Date.now();
       await fs.promises.writeFile(
-        'clan_output/daily/' + Date.now() + '.json',
+        'clan_output/' + now + '.json',
         JSON.stringify(
           Object.values(data).sort((a, b) => b.honor - a.honor),
           null,
           '  ',
         ),
       );
-      if (DATABASE_URL) await insertNewClanStats(data);
+      if (DATABASE_URL) await insertNewClanStats(data, now);
       break;
     }
   }

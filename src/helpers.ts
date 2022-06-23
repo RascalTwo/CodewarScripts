@@ -241,3 +241,7 @@ const RANK_STYLES = [
 export const numericRankToName = (number: number) => {
   return RANK_STYLES.find(rank => rank.rank === number)!.name;
 }
+
+export const rankNameToNumber = (name: string) => {
+  return RANK_STYLES.find(rank => rank.name === name)!.rank;
+}

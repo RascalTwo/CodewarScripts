@@ -2,8 +2,9 @@ import fs from 'fs';
 // @ts-ignore
 import fetch from 'node-fetch';
 import { JSDOM } from 'jsdom';
-import { USER_NAME, USER_AGENT, REMEMBER_USER_TOKEN, CLAN } from './constants';
+import { USER_NAME, USER_AGENT, REMEMBER_USER_TOKEN, CLAN, DATABASE_URL } from './constants';
 import { delay, numericRankToName } from './helpers';
+import { insertNewClanStats } from './database';
 
 const flattenDate = (input: any) => {
   const date = new Date(input);
@@ -29,7 +30,7 @@ function parseHTMLUsernames(html: string): Record<string, Entry> {
   }, {});
 }
 
-interface Entry {
+export interface Entry {
   rank: string;
   honor: number;
   username: string;
@@ -199,6 +200,7 @@ if (require.main === module) (async () => {
           '  ',
         ),
       );
+      if (DATABASE_URL) await insertNewClanStats(data);
       break;
     }
   }

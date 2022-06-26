@@ -10,9 +10,9 @@ import {
 } from '../helpers';
 import { FORMATTERS__DISABLE_GIT, FORMATTER__DAILY_FILES__COMMIT_PER_KATA } from '../constants';
 
-import simpleGit, { SimpleGit, SimpleGitOptions } from 'simple-git';
+import simpleGit from 'simple-git';
 
-import { CompletedKata, CompletedKataFormatter, Solution } from '../types';
+import type { CompletedKata, CompletedKataFormatter, Solution } from '../types';
 
 const formatDay = (date: Date) =>
   `${date.getFullYear()}_${(date.getMonth() + 1).toString().padStart(2, '0')}_${date

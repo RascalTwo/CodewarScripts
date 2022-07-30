@@ -47,6 +47,10 @@ export function getLanguageExtension(language: string) {
       return 'rb'
     case 'sql':
       return 'sql'
+    case 'rust':
+      return 'rs'
+    case 'go':
+      return 'go'
     default:
       throw new Error(`Unhandled language extension: ${language}`);
   }
@@ -80,6 +84,10 @@ export const getLanguageName = (language: string) => {
       return 'Ruby'
     case 'sql':
       return 'SQL'
+    case 'rust':
+      return 'Rust';
+    case 'go':
+      return 'Go';
     default:
       throw new Error(`Unhandled language name: ${language}`);
   }
@@ -113,6 +121,10 @@ export const generateCommentLine = (language: string, content: string) => {
       return '#\t' + content
     case 'sql':
       return '--\t' + content
+    case 'rust':
+      return '//\t' + content;
+    case 'go':
+      return '//\t' + content;
     default:
       throw new Error(`Unhandled language comment: ${language}`);
   }

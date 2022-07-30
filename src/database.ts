@@ -79,12 +79,13 @@ export async function insertNewClanStats(stats: Record<string, Entry>, when = Da
     // TODO - look into optimizing $slice by moving into the $push operator
     for (const document of (await prisma.clanMemberChanges.aggregateRaw({
       pipeline: [
-        // Sort by when and username descending
-        { $sort: { when: -1, username: -1 } },
         // Group documents by username
-        { $group: { _id: '$username', results: { $push: '$$ROOT' } } },
-        // Set results to results sliced to 2 documents
-        { $project: { results: { $slice: ['$results', 2] } } },
+        {
+          $group: {
+            _id: '$username',
+            results: { $topN: { n: 2, sortBy: { when: -1, username: -1 }, output: '$$ROOT' } },
+          },
+        },
       ],
       options: {
         allowDiskUse: true,

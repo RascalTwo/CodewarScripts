@@ -86,6 +86,9 @@ export async function insertNewClanStats(stats: Record<string, Entry>, when = Da
         // Set results to results sliced to 2 documents
         { $project: { results: { $slice: ['$results', 2] } } },
       ],
+      options: {
+        allowDiskUse: true,
+      },
     })) as any) {
       previousTwoDocuments[document._id] = document.results.map(({ _id, honor, rank, username, when }: any) => ({
         honor, rank, username,

@@ -138,7 +138,8 @@ export async function insertNewClanStats(stats: Record<string, Entry>, when = Da
   }
   console.log();
 
-  console.log(await prisma.clanMemberChanges.createMany({ data: creates }));
+  if (creates.length) console.log(await prisma.clanMemberChanges.createMany({ data: creates }));
+  else console.log('No new data to insert');
 
   return prisma.$disconnect();
 }

@@ -201,7 +201,7 @@ if (require.main === module) (async () => {
           '  ',
         ),
       );
-      if (DATABASE_URL) await insertNewClanStats(data, now);
+      if (DATABASE_URL) await insertNewClanStats(data, now).catch(err => console.error('Database Error:', err));
       break;
     }
   }

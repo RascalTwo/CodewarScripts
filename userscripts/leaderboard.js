@@ -10,7 +10,7 @@
 (async () => {
 	const log = (...args) => console.log('[R2 Codewars Clan Leaderboard]', ...args);
 
-	function parseSelf() {
+	function fetchSelf() {
 		return fetch(`https://www.codewars.com/api/v1/users/${window.location.pathname.split('/')[2]}`)
 			.then(res => res.json())
 			.then(user => ({
@@ -22,7 +22,7 @@
 			}))
 	}
 
-	let self = await parseSelf();
+	let self = await fetchSelf();
 	let nth = 1;
 	let seen = new Set();
 
@@ -129,7 +129,7 @@
 		if (newPathname === pathname) return;
 		pathname = newPathname;
 		nth = 1;
-		parseSelf().then(newSelf => {
+		return fetchSelf().then(newSelf => {
 			self = newSelf;
 
 			observer.disconnect();

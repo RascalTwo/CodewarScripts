@@ -2,7 +2,7 @@
 // @name        Codewars Clan Leaderboard
 // @match       https://www.codewars.com/*
 // @grant       none
-// @version     1.1
+// @version     1.2
 // @author      Rascal_Two
 // ==/UserScript==
 
@@ -11,19 +11,18 @@
 	const log = (...args) => console.log('[R2 Codewars Clan Leaderboard]', ...args);
 
 	function parseSelf() {
-		const wrapper = document.querySelector('.profile-points');
-		if (!wrapper) return null;
-
-		return {
-			rank: wrapper.children[0].textContent,
-			honor: +wrapper.children[1].textContent.replace(/,/g, ''),
-			username: document.querySelector('#header_profile_link').href.split('/').at(-1),
-			rankClass: wrapper.children[0].className,
-			avatarImage: document.querySelector('.profile-pic img').src
-		}
+		return fetch(`https://www.codewars.com/api/v1/users/${window.location.pathname.split('/')[2]}`)
+			.then(res => res.json())
+			.then(user => ({
+				username: user.username,
+				rank: user.ranks.overall.name,
+				honor: user.honor,
+				rankColor: user.ranks.overall.color,
+				avatarImage: document.querySelector('figure.profile-pic img').src,
+			}))
 	}
 
-	let self = parseSelf();
+	let self = await parseSelf();
 	let nth = 1;
 	let seen = new Set();
 
@@ -47,8 +46,8 @@
 		}
 	}
 
-	function processTable(table) {
-		for (const row of table.querySelectorAll('tr[data-username]')) {
+	function processTable(table, isFirst) {
+		for (const [i, row] of table.querySelectorAll('tr[data-username]').entries()) {
 			const user = parseUserFromRow(row);
 			if (seen.has(user.username)) {
 				row.remove()
@@ -63,12 +62,16 @@
 			row.style.display = isUserRowVisible(user) ? 'table-row' : 'none';
 
 			row.innerHTML = `<td>#${nth++}</td>` + row.innerHTML;
-			if (self && user.honor >= self.honor && (row.nextSibling && parseUserFromRow(row.nextSibling).honor <= self.honor)) {
+			if (!self) continue;
+
+			const goesAfterThisRow = user.honor >= self.honor && (row.nextSibling && parseUserFromRow(row.nextSibling).honor <= self.honor);
+			const goesBeforeThisRow = i === 0 && isFirst && user.honor < self.honor;
+			if (goesAfterThisRow || goesBeforeThisRow) {
 				const selfRow = document.createElement('tr')
 				selfRow.innerHTML = `<tr data-username="${self.username}">
 					<td>#${nth++}</td>
 					<td class="is-big">
-						<div class="${self.rankClass} float-left mt-5px mr-5">
+						<div class="small-hex is-extra-wide is-invertable is-${self.rankColor}-rank float-left mt-5px mr-5">
 							<div class="inner-small-hex is-extra-wide ">
 								<span>${self.rank}</span>
 							</div>
@@ -82,9 +85,9 @@
 						<i title="Clan" class="icon-moon-clan "></i>
 						#100Devs - leonnoel.com/twitch
 					</td>
-					<td>${self.honor}</td>
+					<td class="honor">${self.honor.toLocaleString()}</td>
 				</tr>`
-				row.parentNode.insertBefore(selfRow, row.nextSibling)
+				row.parentNode.insertBefore(selfRow, goesAfterThisRow ? row.nextSibling : row)
 			}
 		}
 		log('Table processed')
@@ -93,7 +96,7 @@
 	const observer = new MutationObserver((records) => {
 		for (const record of records) {
 			for (const node of record.addedNodes) {
-				if (node.classList.contains('leaderboard')) processTable(node);
+				if (node.classList.contains('leaderboard')) processTable(node, false);
 			}
 		}
 	});
@@ -119,18 +122,20 @@
 		clanFilter.appendChild(select);
 		tbody.prepend(controls)
 
-		processTable(root);
+		processTable(root, true);
 	}
 	new MutationObserver(() => {
 		const newPathname = window.location.pathname;
 		if (newPathname === pathname) return;
 		pathname = newPathname;
 		nth = 1;
-		self = parseSelf();
+		parseSelf().then(newSelf => {
+			self = newSelf;
 
-		observer.disconnect();
-		if (!pathname.match(/users\/.*\/(allies|following|followers)/)) return;
+			observer.disconnect();
+			if (!pathname.match(/users\/.*\/(allies|following|followers)/)) return;
 
-		setTimeout(start, 5000);
+			setTimeout(start, 5000);
+		});
 	}).observe(document, { subtree: true, childList: true });
 })();
